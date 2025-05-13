@@ -1,0 +1,28 @@
+.searchBar {
+  display: flex;
+  align-items: center;
+  background: white;
+  border-radius: var(--radius-md);
+  padding: var(--space-sm) var(--space-md);
+  width: 100%;
+  max-width: 400px;
+  box-shadow: var(--shadow-sm);
+}
+
+.searchIcon {
+  color: var(--text-light);
+  margin-right: var(--space-sm);
+}
+
+.searchInput {
+  border: none;
+  outline: none;
+  flex-grow: 1;
+  padding: var(--space-sm);
+  font-family: var(--font-main);
+  background: transparent;
+}
+
+.searchInput::placeholder {
+  color: var(--text-light);
+}

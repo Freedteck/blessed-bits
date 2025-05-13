@@ -1,0 +1,62 @@
+/* src/pages/OnboardingPage.module.css */
+.onboardingContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+  padding: var(--space-xl);
+}
+
+.onboardingCard {
+  background: white;
+  border-radius: var(--radius-xl);
+  width: 100%;
+  max-width: 500px;
+  padding: var(--space-2xl);
+  box-shadow: var(--shadow-xl);
+}
+
+.onboardingLogo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-family: var(--font-heading);
+  margin-bottom: var(--space-lg);
+  color: var(--primary);
+}
+
+.logoIcon {
+  font-size: 1.8rem;
+}
+
+.onboardingForm h1 {
+  font-size: 1.8rem;
+  text-align: center;
+  margin-bottom: var(--space-sm);
+}
+
+.subtext {
+  text-align: center;
+  color: var(--text-light);
+  margin-bottom: var(--space-xl);
+}
+
+.termsText {
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--text-light);
+}
+
+@media (max-width: 480px) {
+  .onboardingCard {
+    padding: var(--space-lg);
+  }
+
+  .onboardingForm h1 {
+    font-size: 1.5rem;
+  }
+}

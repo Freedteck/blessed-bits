@@ -1,0 +1,42 @@
+.creatorCard {
+  background: white;
+  border-radius: var(--radius-xl);
+  padding: var(--space-xl);
+  box-shadow: var(--shadow-md);
+  transition: transform 0.3s ease;
+  text-align: center;
+}
+
+.creatorCard:hover {
+  transform: translateY(-10px);
+}
+
+.creatorAvatar {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto var(--space-md);
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.creatorCard h3 {
+  margin-bottom: var(--space-sm);
+}
+
+.creatorDescription {
+  color: var(--text-light);
+  margin-bottom: var(--space-md);
+}
+
+.creatorStats {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.875rem;
+  color: var(--text-light);
+}

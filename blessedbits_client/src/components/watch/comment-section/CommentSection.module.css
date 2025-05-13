@@ -1,0 +1,135 @@
+.commentsSection {
+  margin-top: var(--space-xl);
+}
+
+.commentsSection h2 {
+  font-size: 1.25rem;
+  margin-bottom: var(--space-lg);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.commentsSection svg {
+  color: var(--text-light);
+}
+
+.commentForm {
+  display: flex;
+  gap: var(--space-md);
+  margin-bottom: var(--space-xl);
+}
+
+.userAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.commentInputContainer {
+  flex-grow: 1;
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.commentInputContainer input {
+  flex-grow: 1;
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--light-gray);
+  border-radius: var(--radius-md);
+  font-family: var(--font-main);
+}
+
+.commentSubmit {
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 0 var(--space-md);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.commentsList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.comment {
+  display: flex;
+  gap: var(--space-md);
+}
+
+.commentAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 0.875rem;
+  flex-shrink: 0;
+}
+
+.commentContent {
+  flex-grow: 1;
+}
+
+.commentHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-xs);
+}
+
+.commentAuthor {
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.commentTime {
+  font-size: 0.75rem;
+  color: var(--text-light);
+}
+
+.commentText {
+  margin-bottom: var(--space-sm);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.commentActions {
+  display: flex;
+  gap: var(--space-md);
+}
+
+.commentAction {
+  background: none;
+  border: none;
+  font-size: 0.75rem;
+  color: var(--text-light);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: 0;
+}
+
+.commentAction.liked {
+  color: var(--primary);
+}
+
+.commentAction svg {
+  font-size: 0.875rem;
+}

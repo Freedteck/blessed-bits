@@ -1,0 +1,13 @@
+.videoPlayer {
+  position: relative;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-bottom: var(--space-md);
+  background: #000;
+}
+
+.videoPlayer video {
+  width: 100%;
+  display: block;
+  cursor: pointer;
+}

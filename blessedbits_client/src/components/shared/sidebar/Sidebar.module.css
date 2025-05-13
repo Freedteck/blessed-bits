@@ -1,0 +1,121 @@
+.sidebar {
+  background: var(--dark);
+  color: white;
+  padding: var(--space-xl) var(--space-lg);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.navLogo {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: var(--space-xl);
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.logoIcon {
+  color: var(--primary);
+}
+
+.navLogo span span {
+  color: var(--accent);
+}
+
+.navMenu {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  flex-grow: 1;
+}
+
+.navLink {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  color: var(--text-light);
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.navLink:hover,
+.navLink.active {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.navLink svg {
+  font-size: 1.25rem;
+}
+
+.navFooter {
+  margin-top: auto;
+  padding-top: var(--space-md);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.userProfile {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.userAvatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+}
+
+.username {
+  font-weight: 600;
+}
+
+.walletAddress {
+  font-size: 0.75rem;
+  color: var(--text-light);
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    bottom: 0;
+    top: auto;
+    height: auto;
+    width: 100%;
+    padding: var(--space-sm);
+    z-index: 100;
+  }
+
+  .navLogo,
+  .navFooter {
+    display: none;
+  }
+
+  .navMenu {
+    flex-direction: row;
+    justify-content: space-around;
+  }
+
+  .navLink span {
+    display: none;
+  }
+
+  .navLink {
+    padding: var(--space-sm);
+    justify-content: center;
+  }
+}

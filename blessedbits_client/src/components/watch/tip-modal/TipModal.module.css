@@ -1,0 +1,101 @@
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modalContent {
+  background: white;
+  border-radius: var(--radius-lg);
+  width: 100%;
+  max-width: 400px;
+  overflow: hidden;
+}
+
+.modalHeader {
+  padding: var(--space-md);
+  border-bottom: 1px solid var(--light-gray);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modalHeader h3 {
+  font-size: 1.25rem;
+}
+
+.modalClose {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  cursor: pointer;
+  color: var(--text-light);
+}
+
+.modalBody {
+  padding: var(--space-md);
+}
+
+.modalBody p {
+  margin-bottom: var(--space-md);
+  color: var(--text-light);
+}
+
+.tipAmounts {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-sm);
+  margin: var(--space-md) 0;
+}
+
+.tipAmount {
+  background: rgba(108, 77, 246, 0.1);
+  color: var(--primary);
+  border: none;
+  padding: var(--space-sm);
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.tipAmount:hover,
+.tipAmount.selected {
+  background: var(--primary);
+  color: white;
+}
+
+.customTip {
+  display: flex;
+  border: 1px solid var(--light-gray);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  margin-top: var(--space-md);
+}
+
+.customTip input {
+  flex-grow: 1;
+  padding: var(--space-sm);
+  border: none;
+  outline: none;
+  font-family: var(--font-main);
+}
+
+.customTip span {
+  padding: var(--space-sm);
+  background: var(--light-gray);
+  color: var(--text-light);
+}
+
+.modalFooter {
+  padding: var(--space-md);
+  border-top: 1px solid var(--light-gray);
+  text-align: right;
+}
