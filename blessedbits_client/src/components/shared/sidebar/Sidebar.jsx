@@ -9,16 +9,17 @@ import {
   FaPrayingHands,
 } from "react-icons/fa";
 import styles from "./Sidebar.module.css";
+import { NavLink } from "react-router-dom";
 
-const Sidebar = ({ activeLink = "home" }) => {
+const Sidebar = () => {
   const navLinks = [
-    { icon: <FaHome />, label: "Home", path: "/app", key: "home" },
-    { icon: <FaCompass />, label: "Explore", path: "#", key: "explore" },
-    { icon: <FaPlusCircle />, label: "Upload", path: "/upload", key: "upload" },
-    { icon: <FaCoins />, label: "Rewards", path: "/rewards", key: "rewards" },
-    { icon: <FaTrophy />, label: "Badges", path: "/badges", key: "badges" },
-    { icon: <FaUser />, label: "Profile", path: "/profile", key: "profile" },
-    { icon: <FaCog />, label: "Settings", path: "/settings", key: "settings" },
+    { icon: <FaHome />, label: "Home", path: "/app", key: "home", end: true },
+    { icon: <FaCompass />, label: "Explore", path: "explore", key: "explore" },
+    { icon: <FaPlusCircle />, label: "Upload", path: "upload", key: "upload" },
+    { icon: <FaCoins />, label: "Rewards", path: "rewards", key: "rewards" },
+    { icon: <FaTrophy />, label: "Badges", path: "badges", key: "badges" },
+    { icon: <FaUser />, label: "Profile", path: "profile", key: "profile" },
+    { icon: <FaCog />, label: "Settings", path: "settings", key: "settings" },
   ];
 
   return (
@@ -32,16 +33,17 @@ const Sidebar = ({ activeLink = "home" }) => {
 
       <nav className={styles.navMenu}>
         {navLinks.map((link) => (
-          <a
-            href={link.path}
-            className={`${styles.navLink} ${
-              activeLink === link.key ? styles.active : ""
-            }`}
+          <NavLink
+            to={link.path}
+            className={({ isActive }) =>
+              `${styles.navLink} ${isActive ? styles.active : ""}`
+            }
+            end={link.end}
             key={link.key}
           >
             {link.icon}
             <span>{link.label}</span>
-          </a>
+          </NavLink>
         ))}
       </nav>
 

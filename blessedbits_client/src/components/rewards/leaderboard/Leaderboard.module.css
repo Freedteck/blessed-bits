@@ -1,0 +1,59 @@
+.leaderboard {
+  margin-top: var(--space-md);
+}
+
+.leaderboardItem {
+  display: flex;
+  align-items: center;
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-sm);
+  background: rgba(0, 0, 0, 0.02);
+  margin-bottom: var(--space-xs);
+  transition: background 0.3s ease;
+}
+
+.leaderboardItem:hover {
+  background: rgba(108, 77, 246, 0.05);
+}
+
+.rank {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  margin-right: var(--space-md);
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  flex-grow: 1;
+}
+
+.userAvatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 0.875rem;
+  margin-right: var(--space-md);
+}
+
+.userName {
+  font-weight: 500;
+}
+
+.earnings {
+  font-weight: 600;
+  color: var(--primary);
+}

@@ -1,0 +1,72 @@
+.badgeCard {
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s ease;
+  border: 1px solid var(--light-gray);
+}
+
+.badgeCard:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-md);
+}
+
+.badgeCard.earned {
+  border-top: 4px solid var(--primary);
+}
+
+.badgeCard.locked {
+  opacity: 0.7;
+}
+
+.badgeCard.rare {
+  border: 1px solid var(--accent);
+}
+
+.badgeIcon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto var(--space-md);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 2rem;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+}
+
+.badgeCard.rare .badgeIcon {
+  background: linear-gradient(135deg, #ffd700, #ffa500);
+}
+
+.lockedIcon {
+  background: var(--light) !important;
+  color: var(--text-light) !important;
+  border: 2px dashed var(--text-light) !important;
+}
+
+.badgeCard h3 {
+  margin-bottom: var(--space-sm);
+  font-size: 1.1rem;
+}
+
+.badgeCard p {
+  color: var(--text-light);
+  font-size: 0.9rem;
+  margin-bottom: var(--space-md);
+}
+
+.badgeDate {
+  font-size: 0.8rem;
+  color: var(--primary);
+  font-weight: 500;
+}
+
+.badgeProgress {
+  font-size: 0.8rem;
+  color: var(--secondary);
+  font-weight: 500;
+}

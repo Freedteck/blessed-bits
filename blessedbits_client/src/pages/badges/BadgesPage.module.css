@@ -1,0 +1,132 @@
+.mainContent {
+  padding: var(--space-xl);
+  background-color: var(--light);
+}
+
+.pageHeader {
+  margin-bottom: var(--space-lg);
+}
+
+.pageHeader h2 {
+  font-size: 1.8rem;
+  margin-bottom: var(--space-sm);
+}
+
+.badgesSummary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  margin-top: var(--space-sm);
+}
+
+.badgesSummary span {
+  font-size: 0.9rem;
+  color: var(--text-light);
+  white-space: nowrap;
+}
+
+.progressBar {
+  flex-grow: 1;
+  height: 6px;
+  background: var(--light-gray);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: var(--primary);
+  border-radius: var(--radius-full);
+}
+
+.badgesCategories {
+  display: flex;
+  gap: var(--space-sm);
+  margin: var(--space-xl) 0 var(--space-lg);
+  flex-wrap: wrap;
+}
+
+.category {
+  padding: var(--space-xs) var(--space-md);
+  border-radius: var(--radius-full);
+  background: rgba(108, 77, 246, 0.1);
+  color: var(--primary);
+  font-size: 0.9rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.category:hover {
+  background: rgba(108, 77, 246, 0.2);
+}
+
+.category.active {
+  background: var(--primary);
+  color: white;
+}
+
+.badgesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--space-lg);
+  margin-top: var(--space-md);
+}
+
+.benefitsCard {
+  margin-top: var(--space-2xl);
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+  box-shadow: var(--shadow-sm);
+}
+
+.benefitsCard h3 {
+  margin-bottom: var(--space-lg);
+  font-size: 1.3rem;
+}
+
+.benefitsList {
+  margin-top: var(--space-md);
+}
+
+.benefitItem {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+.benefitIcon {
+  color: var(--primary);
+  margin-top: 0.2rem;
+  flex-shrink: 0;
+}
+
+/* Responsive Styles */
+@media (max-width: 1024px) {
+  .mainContent {
+    padding: var(--space-lg);
+  }
+}
+
+@media (max-width: 768px) {
+  .badgesGrid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .badgesGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .badgesCategories {
+    gap: var(--space-xs);
+  }
+
+  .category {
+    padding: var(--space-xs) var(--space-sm);
+    font-size: 0.8rem;
+  }
+}

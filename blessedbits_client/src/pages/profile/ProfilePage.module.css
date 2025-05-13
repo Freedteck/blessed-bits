@@ -1,0 +1,246 @@
+.mainContent {
+  padding: var(--space-md) var(--space-xl);
+  background-color: var(--light);
+}
+
+/* Profile Banner */
+.profileBanner {
+  position: relative;
+  height: 240px;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-bottom: 80px;
+}
+
+.bannerImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profileOverlay {
+  position: absolute;
+  bottom: 0px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 0 var(--space-xl);
+}
+
+.profileAvatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 2.5rem;
+  font-weight: 600;
+  border: 4px solid white;
+}
+
+.profileActions {
+  display: flex;
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+.actionBtn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  background: transparent;
+  border: 1px solid white;
+  color: white;
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.editBtn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  background: var(--primary);
+  border: none;
+  color: white;
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+/* Profile Info */
+.profileInfo {
+  margin-top: var(--space-xl);
+  padding: 0 var(--space-md);
+}
+
+.profileInfo h1 {
+  font-size: 2rem;
+  margin-bottom: var(--space-sm);
+}
+
+.profileBio {
+  color: var(--text-light);
+  margin: var(--space-md) 0 var(--space-xl);
+  font-size: 1.1rem;
+  line-height: 1.6;
+}
+
+.bioInput {
+  width: 100%;
+  padding: var(--space-md);
+  border: 1px solid var(--light-gray);
+  border-radius: var(--radius-md);
+  font-family: var(--font-main);
+  margin: var(--space-md) 0 var(--space-xl);
+  resize: vertical;
+  min-height: 100px;
+}
+
+.profileStats {
+  display: flex;
+  gap: var(--space-xl);
+  margin: var(--space-xl) 0;
+}
+
+.statItem {
+  text-align: center;
+}
+
+.statValue {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.statLabel {
+  font-size: 0.875rem;
+  color: var(--text-light);
+}
+
+/* Badges Section */
+.badgesSection {
+  margin: var(--space-xl) 0;
+}
+
+.badgesSection h3 {
+  margin-bottom: var(--space-md);
+}
+
+.badgesScroll {
+  display: flex;
+  gap: var(--space-md);
+  overflow-x: auto;
+  padding-bottom: var(--space-sm);
+}
+
+.badgeIcon {
+  min-width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  padding: var(--space-sm);
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.badgeIcon svg {
+  font-size: 1.5rem;
+  margin-bottom: var(--space-xs);
+}
+
+.badgeIcon span {
+  font-size: 0.7rem;
+  line-height: 1.2;
+}
+
+.badgeIcon.locked {
+  background: var(--light);
+  color: var(--text-light);
+  border: 2px dashed var(--text-light);
+}
+
+/* Videos Section */
+.videosSection {
+  margin-top: var(--space-xl);
+}
+
+.videosSection h2 {
+  margin-bottom: var(--space-lg);
+  padding-left: var(--space-md);
+}
+
+.videoGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--space-lg);
+}
+
+/* Responsive Styles */
+@media (max-width: 1024px) {
+  .mainContent {
+    padding: var(--space-md);
+  }
+}
+
+@media (max-width: 768px) {
+  .profileBanner {
+    height: 180px;
+  }
+
+  .profileOverlay {
+    flex-direction: column;
+    align-items: flex-start;
+    bottom: -80px;
+  }
+
+  .profileAvatar {
+    width: 100px;
+    height: 100px;
+    margin-bottom: var(--space-md);
+  }
+
+  .profileActions {
+    margin-top: var(--space-md);
+  }
+
+  .profileStats {
+    flex-wrap: wrap;
+    gap: var(--space-md);
+  }
+
+  .statItem {
+    flex: 1 0 40%;
+  }
+
+  .videoGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .videoGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .profileStats {
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+
+  .statItem {
+    flex: 1 0 100%;
+  }
+}

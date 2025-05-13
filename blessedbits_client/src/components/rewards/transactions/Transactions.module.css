@@ -1,0 +1,68 @@
+.transactions {
+  margin-top: var(--space-md);
+}
+
+.transaction {
+  display: flex;
+  align-items: center;
+  padding: var(--space-sm) 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.transaction:last-child {
+  border-bottom: none;
+}
+
+.transactionIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: var(--space-md);
+}
+
+.transactionIcon.earn {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--success);
+}
+
+.transactionIcon.spend {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--error);
+}
+
+.transactionDetails {
+  flex-grow: 1;
+}
+
+.transactionTitle {
+  display: block;
+  font-weight: 500;
+  margin-bottom: var(--space-xs);
+}
+
+.transactionDate {
+  font-size: 0.75rem;
+  color: var(--text-light);
+}
+
+.transactionAmount {
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+}
+
+.transactionAmount.earn {
+  color: var(--success);
+}
+
+.transactionAmount.spend {
+  color: var(--error);
+}
+
+.arrowIcon {
+  margin-right: var(--space-xs);
+  font-size: 0.75rem;
+}

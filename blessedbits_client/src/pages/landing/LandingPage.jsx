@@ -99,6 +99,9 @@ const LandingPage = () => {
 
   return (
     <div className={styles.landingContainer}>
+      {/* Background overlay div */}
+      <div className={styles.backgroundOverlay}></div>
+
       <header className={styles.landingHeader}>
         <div className={styles.logo}>
           <FaPrayingHands className={styles.logoIcon} />
@@ -128,7 +131,7 @@ const LandingPage = () => {
             earn rewards and keep ownership.
           </p>
           <div className={styles.ctaButtons}>
-            <Button variant="primary" onClick={() => navigate("/app")}>
+            <Button variant="primary" onClick={() => navigate("app")}>
               Enter App
             </Button>
             <Button variant="outline">Learn More</Button>

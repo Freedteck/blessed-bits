@@ -91,3 +91,30 @@
   font-size: 0.75rem;
   white-space: nowrap;
 }
+
+.videoCard.compact {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.videoCard.compact .videoThumbnail {
+  width: 120px;
+  height: 80px;
+}
+
+.videoCard.compact .videoInfo {
+  padding: 0;
+}
+
+.videoCard.compact .videoTitle {
+  font-size: 0.875rem;
+  margin-bottom: var(--space-xs);
+}
+
+.videoCard.compact .videoStats {
+  font-size: 0.75rem;
+}
+
+.videoCard.compact .videoStats svg {
+  font-size: 0.7rem;
+}

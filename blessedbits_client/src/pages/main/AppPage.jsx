@@ -1,5 +1,5 @@
 import { useState } from "react";
-import VideoCard from "../../components/main/video-card/VideoCard";
+import VideoCard from "../../components/shared/video-card/VideoCard";
 import SearchBar from "../../components/shared/searchbar/SearchBar";
 import styles from "./AppPage.module.css";
 
