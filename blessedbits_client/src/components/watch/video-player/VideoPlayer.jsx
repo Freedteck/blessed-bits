@@ -20,6 +20,7 @@ const VideoPlayer = ({ src, poster, title }) => {
       <video
         ref={videoRef}
         controls
+        autoPlay
         poster={poster}
         onClick={togglePlay}
         aria-label={title}

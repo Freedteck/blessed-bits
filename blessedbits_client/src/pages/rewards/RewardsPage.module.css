@@ -1,11 +1,5 @@
-.container {
-  display: grid;
-  grid-template-columns: 240px 1fr;
-  min-height: 100vh;
-}
-
 .mainContent {
-  padding: var(--space-xl);
+  padding: 2rem;
   background-color: var(--light);
 }
 
@@ -13,40 +7,59 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--space-xl);
+  margin-bottom: 1.5rem;
 }
 
-.convertButton {
+.actionButtons {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.stakeButton,
+.unstakeButton {
   display: flex;
   align-items: center;
-  gap: var(--space-sm);
-  background: var(--primary);
-  color: white;
-  border: none;
-  padding: var(--space-sm) var(--space-md);
-  border-radius: var(--radius-md);
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
+  border: none;
 }
 
-.convertButton:hover {
-  background: var(--secondary);
+.stakeButton {
+  background-color: var(--primary);
+  color: white;
 }
 
+.stakeButton:hover {
+  background-color: #5a3fd6;
+}
+
+.unstakeButton {
+  background-color: var(--secondary);
+  color: white;
+}
+
+.unstakeButton:hover {
+  background-color: #e66d2a;
+}
+
+/* Beautiful Balance Card */
 .balanceCard {
   background: linear-gradient(135deg, var(--primary), var(--secondary));
   color: white;
-  padding: var(--space-xl);
-  border-radius: var(--radius-lg);
-  margin-bottom: var(--space-xl);
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
 }
 
 .balanceHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--space-sm);
+  margin-bottom: 0.5rem;
   font-size: 0.875rem;
   opacity: 0.9;
 }
@@ -56,38 +69,63 @@
 }
 
 .balanceAmount {
-  font-size: 2.5rem;
+  font-size: 2rem;
   font-weight: 700;
-  margin: var(--space-sm) 0;
+  margin: 0.5rem 0;
 }
 
-.balanceEquivalent {
+.balanceDetails {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.detailItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.detailIcon {
   font-size: 1rem;
-  opacity: 0.9;
 }
 
+.votingPowerBadge {
+  background-color: var(--accent);
+  color: var(--dark);
+  padding: 0.25rem 0.5rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+/* Cards */
 .card {
   background: white;
-  border-radius: var(--radius-lg);
-  padding: var(--space-xl);
-  box-shadow: var(--shadow-sm);
-  margin-bottom: var(--space-xl);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  margin-bottom: 1.5rem;
 }
 
 .card h3 {
-  margin-bottom: var(--space-md);
+  margin-bottom: 1rem;
   font-size: 1.25rem;
+  color: var(--text);
 }
 
 .chartContainer {
-  margin-top: var(--space-lg);
+  margin-top: 1rem;
 }
 
 .chartBars {
   display: flex;
   height: 200px;
   align-items: flex-end;
-  gap: var(--space-md);
+  gap: 0.5rem;
 }
 
 .chartBarContainer {
@@ -95,13 +133,13 @@
   flex-direction: column;
   align-items: center;
   flex-grow: 1;
-  gap: var(--space-sm);
+  gap: 0.5rem;
 }
 
 .chartBar {
   width: 100%;
   background: linear-gradient(to top, var(--primary), var(--accent));
-  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  border-radius: 6px 6px 0 0;
   transition: height 0.5s ease;
 }
 
@@ -111,33 +149,25 @@
 }
 
 /* Responsive Styles */
-@media (max-width: 1024px) {
-  .container {
-    grid-template-columns: 200px 1fr;
-  }
-
-  .mainContent {
-    padding: var(--space-lg);
-  }
-}
-
 @media (max-width: 768px) {
-  .container {
-    grid-template-columns: 1fr;
-  }
-
   .pageHeader {
     flex-direction: column;
     align-items: flex-start;
-    gap: var(--space-md);
+    gap: 1rem;
   }
 
-  .convertButton {
+  .actionButtons {
     width: 100%;
+  }
+
+  .stakeButton,
+  .unstakeButton {
+    flex: 1;
     justify-content: center;
   }
 
-  .chartBars {
-    gap: var(--space-xs);
+  .balanceDetails {
+    flex-direction: column;
+    gap: 0.75rem;
   }
 }

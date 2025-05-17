@@ -2,6 +2,7 @@ import { useState } from "react";
 import VideoCard from "../../components/shared/video-card/VideoCard";
 import SearchBar from "../../components/shared/searchbar/SearchBar";
 import styles from "./AppPage.module.css";
+import { Link } from "react-router-dom";
 
 const AppPage = () => {
   // Sample video data
@@ -10,6 +11,8 @@ const AppPage = () => {
       id: 1,
       thumbnail:
         "https://images.unsplash.com/photo-1545205597-3d9d02c29597?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=180&q=80",
+      videoUrl:
+        "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
       duration: "0:58",
       title: "Morning Meditation Routine",
       creatorInitials: "MG",
@@ -22,7 +25,9 @@ const AppPage = () => {
     {
       id: 2,
       thumbnail:
-        "https://images.unsplash.com/photo-1503764654157-72d97966e920?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=180&q=80",
+        "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=180&q=80", // Fixed thumbnail
+      videoUrl:
+        "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
       duration: "0:45",
       title: "Daily Scripture Reflection",
       creatorInitials: "FP",
@@ -36,6 +41,8 @@ const AppPage = () => {
       id: 3,
       thumbnail:
         "https://images.unsplash.com/photo-1518611012118-696072aa579a?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=180&q=80",
+      videoUrl:
+        "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
       duration: "1:00",
       title: "Christian Yoga Flow",
       creatorInitials: "SL",
@@ -49,6 +56,8 @@ const AppPage = () => {
       id: 4,
       thumbnail:
         "https://images.unsplash.com/photo-1532629345422-7515f3d16bb6?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=180&q=80",
+      videoUrl:
+        "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
       duration: "0:52",
       title: "Evening Prayer Session",
       creatorInitials: "PW",
@@ -62,6 +71,8 @@ const AppPage = () => {
       id: 5,
       thumbnail:
         "https://images.unsplash.com/photo-1497250681960-ef046c08a56e?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=180&q=80",
+      videoUrl:
+        "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
       duration: "0:48",
       title: "God in Nature",
       creatorInitials: "CG",
@@ -75,6 +86,8 @@ const AppPage = () => {
       id: 6,
       thumbnail:
         "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=180&q=80",
+      videoUrl:
+        "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4",
       duration: "0:55",
       title: "Bible Study Tips",
       creatorInitials: "BS",
@@ -121,19 +134,22 @@ const AppPage = () => {
       {videos.length > 0 ? (
         <div className={styles.videoFeed}>
           {videos.map((video) => (
-            <VideoCard
-              key={video.id}
-              videoId={video.id}
-              thumbnail={video.thumbnail}
-              duration={video.duration}
-              title={video.title}
-              creatorInitials={video.creatorInitials}
-              creatorName={video.creatorName}
-              description={video.description}
-              likes={video.likes}
-              earnings={video.earnings}
-              tags={video.tags}
-            />
+            <Link to={`/app/video/${video.id}`} key={video.id}>
+              <VideoCard
+                key={video.id}
+                videoId={video.id}
+                videoUrl={video.videoUrl}
+                thumbnail={video.thumbnail}
+                duration={video.duration}
+                title={video.title}
+                creatorInitials={video.creatorInitials}
+                creatorName={video.creatorName}
+                description={video.description}
+                likes={video.likes}
+                earnings={video.earnings}
+                tags={video.tags}
+              />
+            </Link>
           ))}
         </div>
       ) : (

@@ -21,8 +21,9 @@
   color: var(--primary);
   font-weight: 500;
   cursor: pointer;
-  margin-bottom: var(--space-md);
+  /* margin-bottom: var(--space-sm); */
   grid-column: 1 / -1;
+  padding: 0 var(--space-md);
 }
 
 .videoColumn {

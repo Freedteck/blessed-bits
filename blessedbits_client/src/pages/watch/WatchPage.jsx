@@ -39,7 +39,8 @@ const WatchPage = () => {
         title: "Evening Prayer Session",
         description:
           "Wind down your day with this peaceful prayer. Perfect for reflection before sleep. Remember to like if this blessed you!",
-        videoUrl: "#", // In real app, this would be the actual video URL
+        videoUrl:
+          "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4", // In real app, this would be the actual video URL
         thumbnail:
           "https://images.unsplash.com/photo-1532629345422-7515f3d16bb6?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&h=675&q=80",
         duration: "0:52",

@@ -15,18 +15,27 @@ use sui::clock::{Self, Clock};
 use sui::vec_map::{Self, VecMap};
 use sui::clock::timestamp_ms;
 use sui::balance::{Balance, Self};
+use sui::sui::SUI;
 
-// ====== CONSTANTS ======
+// ====== ERROR CONSTANTS ======
 const ENotOwner: u64 = 0;
 const EInsufficientBalance: u64 = 1;
 const EAlreadyVoted: u64 = 3;
 const ENotCreator: u64 = 4;
 const EUserExists: u64 = 5;
 const EUserNotFound: u64 = 6;
-// const ENotEnoughStake: u64 = 7;
+const ECashbackAlreadyClaimed: u64 = 7;
 const EBadgeNotFound: u64 = 8;
 const ETipToSelf: u64 = 9;
 const EProfileNotUpdated: u64 = 10;
+const EInsufficientVoteFee: u64 = 11;
+const EPurchaseTooSmall: u64 = 12;
+
+// ====== CONSTANTS FOR ======
+const DAILY_CASHBACK_AMOUNT: u64 = 10; // 10 $BLESS per day
+const MILLISECONDS_PER_DAY: u64 = 86400000; // 24 hours in milliseconds
+const MIN_PURCHASE_AMOUNT: u64 = 100; // Minimum $BLESS purchase
+const BLESS_PER_SUI: u64 = 10000; // 10,000 $BLESS per 1 SUI (0.1 SUI = 1,000 $BLESS)
 
 // ====== STRUCTS ======
 public struct BLESSEDBITS has drop {}
@@ -41,13 +50,16 @@ public struct UserProfile has key, store {
     staked: Balance<BLESSEDBITS>,
     staked_amount: u64,
     voting_power: u64,
-    videos_uploaded: u64
+    videos_uploaded: u64,
+    last_cashback_claim: u64,
+    total_cashback_claimed: u64,
 }
 
 public struct Video has key, store {
     id: UID,
     creator: address,
-    ipfs_hash: String,
+    video_url: String,
+    thumbnail_url: String,
     title: String,
     description: String,
     tags: vector<String>,
@@ -81,7 +93,9 @@ public struct PlatformState has key {
     badges: Bag,
     user_profiles: VecMap<address, UserProfile>,
     daily_rewards_pool: u64,
-    last_distribution: u64
+    last_distribution: u64,
+    last_staking_distribution: u64,  // New field to track staking distributions
+    total_staked: u64                // New field to track total staked tokens
 }
 
 // ====== EVENTS ======
@@ -94,7 +108,9 @@ public struct UserRegistered has copy, drop {
 public struct VideoUploaded has copy, drop {
     video_id: ID,
     creator: address,
-    ipfs_hash: String,
+    video_url: String,
+    thumbnail_url: String,
+    title: String,
     timestamp: u64
 }
 
@@ -148,6 +164,33 @@ public struct ProfileUpdated has copy, drop {
     timestamp: u64
 }
 
+public struct ProfileFieldUpdated has copy, drop {
+    user: address,
+    field_updated: String,
+    new_value: String,
+    timestamp: u64
+}
+
+public struct CashbackClaimed has copy, drop {
+    user: address,
+    amount: u64,
+    timestamp: u64
+}
+
+public struct TokensPurchased has copy, drop {
+    user: address,
+    bless_amount: u64,
+    sui_paid: u64,
+    timestamp: u64
+}
+
+
+public struct StakerRewardClaimed has copy, drop {
+    user: address,
+    amount: u64,
+    timestamp: u64
+}
+
 // ====== INITIALIZATION ======
 fun init(witness: BLESSEDBITS, ctx: &mut TxContext) {
     let (treasury_cap, metadata) = coin::create_currency<BLESSEDBITS>(
@@ -172,7 +215,9 @@ fun init(witness: BLESSEDBITS, ctx: &mut TxContext) {
         badges: bag::new(ctx),
         user_profiles: vec_map::empty(),
         daily_rewards_pool: 100000, // 100,000 $BLESS daily pool
-        last_distribution: 0
+        last_distribution: 0,
+        last_staking_distribution: 0, // Initialize new field
+        total_staked: 0              // Initialize new field
     };
 
     transfer::share_object(platform_state);
@@ -205,7 +250,9 @@ public entry fun register_user(
             staked: balance::zero<BLESSEDBITS>(),    // Initialize with zero balance
             staked_amount: 0,
             voting_power: 1,
-            videos_uploaded: 0
+            videos_uploaded: 0,
+            last_cashback_claim: 0,
+            total_cashback_claimed: 0
     };
 
     vec_map::insert(&mut platform.user_profiles, sender, user_profile);
@@ -221,7 +268,8 @@ public entry fun register_user(
 // ====== VIDEO FUNCTIONS ======
 public entry fun upload_video(
     platform: &mut PlatformState,
-    ipfs_hash: String,
+    video_url: String,
+    thumbnail_url: String,
     badge_collection: &mut BadgeCollection,
     title: String,
     description: String,
@@ -240,10 +288,11 @@ public entry fun upload_video(
     let video = Video {
         id: video_id,
         creator: sender,
-        ipfs_hash: copy ipfs_hash,
-        title: copy title,
-        description: copy description,
-        tags: copy tags,
+        video_url: video_url,
+        thumbnail_url: thumbnail_url,
+        title: title,
+        description: description,
+        tags: tags,
         likes: 0,
         dislikes: 0,
         total_rewards: 0,
@@ -263,7 +312,9 @@ public entry fun upload_video(
     event::emit(VideoUploaded {
         video_id: video_id_addr,
         creator: sender,
-        ipfs_hash: copy ipfs_hash,
+        video_url: video_url,
+        thumbnail_url: thumbnail_url,
+        title: title,
         timestamp: timestamp_ms(clock),
     });
 }
@@ -288,9 +339,11 @@ public entry fun refresh_daily_pool(
     platform: &mut PlatformState,
     clock: &Clock
 ) {
-    if (clock::timestamp_ms(clock) - platform.last_distribution > 86400000) { // 24h
-        platform.daily_rewards_pool = 100000;
-        platform.last_distribution = clock::timestamp_ms(clock);
+    let current_time = clock::timestamp_ms(clock);
+    if (current_time - platform.last_distribution > MILLISECONDS_PER_DAY) { // 24h
+        // Base amount + whatever was accumulated from purchases/tips
+        platform.daily_rewards_pool = 100000 + platform.daily_rewards_pool;
+        platform.last_distribution = current_time;
     }
 }
 
@@ -331,13 +384,130 @@ public entry fun update_profile(
     });
 }
 
-// ====== VOTING & REWARDS ======
+public entry fun update_username(
+    platform: &mut PlatformState,
+    new_username: String,
+    clock: &Clock,
+    ctx: &mut TxContext
+) {
+    let sender = tx_context::sender(ctx);
+    assert!(vec_map::contains(&platform.user_profiles, &sender), EUserNotFound);
 
-// Updated vote with creator check
+    let profile = vec_map::get_mut(&mut platform.user_profiles, &sender);
+    profile.username = new_username;
+
+    event::emit(ProfileFieldUpdated {
+        user: sender,
+        field_updated: utf8(b"username"),
+        new_value: copy new_username,
+        timestamp: clock::timestamp_ms(clock)
+    });
+}
+
+public entry fun update_bio(
+    platform: &mut PlatformState,
+    new_bio: String,
+    clock: &Clock,
+    ctx: &mut TxContext
+) {
+    let sender = tx_context::sender(ctx);
+    assert!(vec_map::contains(&platform.user_profiles, &sender), EUserNotFound);
+
+    let profile = vec_map::get_mut(&mut platform.user_profiles, &sender);
+    profile.bio = new_bio;
+
+    event::emit(ProfileFieldUpdated {
+        user: sender,
+        field_updated: utf8(b"bio"),
+        new_value: copy new_bio,
+        timestamp: clock::timestamp_ms(clock)
+    });
+}
+
+// ====== CASHBACK MECHANISM ======
+public entry fun claim_daily_cashback(
+    platform: &mut PlatformState,
+    treasury_cap: &mut TreasuryCap<BLESSEDBITS>,
+    clock: &Clock,
+    ctx: &mut TxContext
+) {
+    let sender = tx_context::sender(ctx);
+    assert!(vec_map::contains(&platform.user_profiles, &sender), EUserNotFound);
+    
+    let user_profile = vec_map::get_mut(&mut platform.user_profiles, &sender);
+    let current_time = clock::timestamp_ms(clock);
+    
+    // Check if 24 hours have passed since last claim
+    assert!(current_time - user_profile.last_cashback_claim >= MILLISECONDS_PER_DAY, ECashbackAlreadyClaimed);
+    
+    // Mint cashback tokens
+    let cashback_tokens = coin::mint(treasury_cap, DAILY_CASHBACK_AMOUNT, ctx);
+    
+    // Update user profile
+    user_profile.last_cashback_claim = current_time;
+    user_profile.total_cashback_claimed = user_profile.total_cashback_claimed + DAILY_CASHBACK_AMOUNT;
+    
+    // Transfer tokens to user
+    transfer::public_transfer(cashback_tokens, sender);
+    
+    event::emit(CashbackClaimed {
+        user: sender,
+        amount: DAILY_CASHBACK_AMOUNT,
+        timestamp: current_time
+    });
+}
+
+// ====== PURCHASE BLESS ======
+public entry fun purchase_tokens(
+    platform: &mut PlatformState,
+    treasury_cap: &mut TreasuryCap<BLESSEDBITS>,
+    mut payment: Coin<SUI>,
+    bless_amount: u64,
+    clock: &Clock,
+    ctx: &mut TxContext
+) {
+    let sender = tx_context::sender(ctx);
+    assert!(vec_map::contains(&platform.user_profiles, &sender), EUserNotFound);
+    assert!(bless_amount >= MIN_PURCHASE_AMOUNT, EPurchaseTooSmall);
+    
+    // Calculate SUI cost (with proper rounding up)
+    let sui_cost = (bless_amount + BLESS_PER_SUI - 1) / BLESS_PER_SUI;
+    assert!(coin::value(&payment) >= sui_cost, EInsufficientBalance);
+    
+    // Split the payment if needed
+    if (coin::value(&payment) > sui_cost) {
+        let excess_amount = coin::value(&payment) - sui_cost;
+        let change = coin::split(&mut payment, excess_amount, ctx);
+        transfer::public_transfer(change, sender);
+    };
+    
+    // Transfer SUI to platform treasury (or specific address)
+    transfer::public_transfer(payment, tx_context::sender(ctx)); // Or platform treasury address
+    
+    // Calculate amount for daily reward pool (20% of purchase)
+    let pool_contribution = (bless_amount * 20) / 100; // 20% goes to reward pool
+    
+    // Update daily rewards pool
+    platform.daily_rewards_pool = platform.daily_rewards_pool + pool_contribution;
+    
+    // Mint $BLESS tokens and transfer to user
+    let bless_tokens = coin::mint(treasury_cap, bless_amount, ctx);
+    transfer::public_transfer(bless_tokens, sender);
+    
+    event::emit(TokensPurchased {
+        user: sender,
+        bless_amount,
+        sui_paid: sui_cost,
+        timestamp: clock::timestamp_ms(clock)
+    });
+}
+
+// ====== VOTING & REWARDS ======
 public entry fun vote(
     platform: &mut PlatformState,
     video_id: ID,
     is_like: bool,
+    mut tokens: Coin<BLESSEDBITS>,  // User pays fee with these tokens
     treasury_cap: &mut TreasuryCap<BLESSEDBITS>,
     clock: &Clock,
     ctx: &mut TxContext
@@ -349,6 +519,28 @@ public entry fun vote(
     assert!(!vec_map::contains(&video.voters, &sender), EAlreadyVoted);
     assert!(video.creator != sender, ENotCreator); // Can't vote on own video
 
+    // Check vote fee
+    let vote_fee = 1; // 1 $BLESS per vote
+    assert!(coin::value(&tokens) >= vote_fee, EInsufficientVoteFee);
+    
+    // Split fees if needed
+    if (coin::value(&tokens) > vote_fee) {
+        let change_amount = coin::value(&tokens) - vote_fee;
+        let change = coin::split(&mut tokens, change_amount, ctx);
+        transfer::public_transfer(change, sender);
+    };
+    
+    // Split the vote fee: 50% burned, 50% to creator
+    let creator_share = coin::split(&mut tokens, vote_fee / 2, ctx);
+    
+    // Burn the remaining tokens (50%)
+    let burn_coins = tokens;
+    coin::burn(treasury_cap, burn_coins);
+    
+    // Send creator share
+    transfer::public_transfer(creator_share, video.creator);
+
+    // Update user voting power and apply vote
     let user_profile = vec_map::get_mut(&mut platform.user_profiles, &sender);
     let voting_power = user_profile.voting_power;
 
@@ -358,7 +550,7 @@ public entry fun vote(
         video.dislikes = video.dislikes + voting_power;
     };
 
-    // Distribute rewards (only for likes)
+    // Distribute rewards from pool (only for likes)
     let reward_amount = if (is_like) { voting_power } else { 0 };
     if (reward_amount > 0 && platform.daily_rewards_pool >= reward_amount) {
         let tokens = coin::mint(treasury_cap, reward_amount, ctx);
@@ -377,6 +569,8 @@ public entry fun vote(
         voting_power_used: voting_power
     });
 }
+
+
 // ====== STAKING MECHANISM ======
 public entry fun stake_tokens(
     platform: &mut PlatformState,
@@ -393,6 +587,11 @@ public entry fun stake_tokens(
     
     // Hold the staked coins
     coin::put(&mut user_profile.staked, tokens);
+    
+    // Update total staked amount for platform
+    platform.total_staked = platform.total_staked + amount;
+    
+    // Update user's staked amount
     user_profile.staked_amount = user_profile.staked_amount + amount;
 
     // Recalculate voting power based on total stake (1 per 10 tokens)
@@ -417,12 +616,15 @@ public entry fun unstake_tokens(
     let amount = user_profile.staked_amount;
     assert!(amount > 0, EInsufficientBalance);
 
+    // Update total staked amount for platform
+    platform.total_staked = platform.total_staked - amount;
+
     // Withdraw all staked coins
     let coins = coin::take(&mut user_profile.staked, amount, ctx);
 
     // Reset staked amount and voting power
     user_profile.staked_amount = 0;
-    user_profile.voting_power = 1; // or 0, depending on your logic
+    user_profile.voting_power = 1; // Default voting power of 1
 
     // Transfer coins back to user
     transfer::public_transfer(coins, sender);
@@ -450,7 +652,13 @@ public entry fun send_tip(
     assert!(vec_map::contains(&platform.user_profiles, &recipient), EUserNotFound);
     assert!(amount > 0, EInsufficientBalance);
 
-    // Mint and transfer tokens
+    // Calculate amount for daily reward pool (20% of tip)
+    let pool_contribution = (amount * 20) / 100; // 20% goes to reward pool
+    
+    // Update daily rewards pool
+    platform.daily_rewards_pool = platform.daily_rewards_pool + pool_contribution;
+    
+    // Mint and transfer tokens to recipient
     let tokens = coin::mint(treasury_cap, amount, ctx);
     transfer::public_transfer(tokens, recipient);
 
@@ -492,6 +700,67 @@ public entry fun award_badge(
         badge_type: copy badge_type,
         timestamp: clock::timestamp_ms(clock)
     });
+}
+
+
+public entry fun distribute_staker_rewards(
+    platform: &mut PlatformState,
+    treasury_cap: &mut TreasuryCap<BLESSEDBITS>,
+    clock: &Clock,
+    ctx: &mut TxContext
+) {
+    // First, check if it's time to distribute (once per day)
+    let current_time = clock::timestamp_ms(clock);
+    if (current_time - platform.last_staking_distribution < MILLISECONDS_PER_DAY) {
+        // Not yet time to distribute
+        return
+    };
+    
+    // Check if there are any staked tokens
+    if (platform.total_staked == 0) {
+        // No one is staking, update timestamp and return
+        platform.last_staking_distribution = current_time;
+        return
+    };
+    
+    // Calculate rewards (10% of daily pool)
+    let rewards_to_distribute = (platform.daily_rewards_pool * 10) / 100;
+    
+    // Distribute rewards proportionally to each staker
+    let user_addresses = vec_map::keys(&platform.user_profiles);
+    let users_count = vector::length(&user_addresses);
+    
+    let mut i = 0;
+    while (i < users_count) {
+        let user_addr = *vector::borrow(&user_addresses, i);
+        let user_profile = vec_map::get_mut(&mut platform.user_profiles, &user_addr);
+        
+        if (user_profile.staked_amount > 0) {
+            // Calculate this user's share of rewards
+            let user_reward = (rewards_to_distribute * user_profile.staked_amount) / platform.total_staked;
+            
+            if (user_reward > 0) {
+                // Mint and transfer tokens to user
+                let reward_tokens = coin::mint(treasury_cap, user_reward, ctx);
+                transfer::public_transfer(reward_tokens, user_addr);
+                
+                // Emit event for staking rewards
+                event::emit(StakerRewardClaimed {
+                    user: user_addr,
+                    amount: user_reward,
+                    timestamp: current_time
+                });
+            };
+        };
+        
+        i = i + 1;
+    };
+    
+    // Update pool after distribution
+    platform.daily_rewards_pool = platform.daily_rewards_pool - rewards_to_distribute;
+    
+    // Reset distribution time
+    platform.last_staking_distribution = current_time;
 }
 
 // ====== SOCIAL FEATURES ======

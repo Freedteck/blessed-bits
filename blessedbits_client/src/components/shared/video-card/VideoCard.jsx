@@ -1,7 +1,9 @@
-import { FaHeart, FaCoins } from "react-icons/fa";
+import { FaHeart, FaCoins, FaPlay } from "react-icons/fa";
+import { useEffect, useRef, useState } from "react";
 import styles from "./VideoCard.module.css";
 
 const VideoCard = ({
+  videoUrl,
   thumbnail,
   duration,
   title,
@@ -13,20 +15,85 @@ const VideoCard = ({
   tags = [],
   compact = false,
 }) => {
+  const videoRef = useRef(null);
+  const [isHovered, setIsHovered] = useState(false);
+  const [hasVideoError, setHasVideoError] = useState(false);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    let timeoutId;
+
+    if (isHovered && !hasVideoError) {
+      timeoutId = setTimeout(() => {
+        try {
+          video.currentTime = 0;
+          const playPromise = video.play();
+          if (playPromise !== undefined) {
+            playPromise.catch((err) => {
+              console.warn("Video play prevented:", err);
+              setHasVideoError(true);
+            });
+          }
+        } catch (err) {
+          console.error("Video playback failed:", err);
+          setHasVideoError(true);
+        }
+      }, 100); // Delay reduces flicker or race
+    } else {
+      video.pause();
+    }
+
+    return () => {
+      clearTimeout(timeoutId);
+      video.pause();
+    };
+  }, [isHovered, hasVideoError]);
+
   return (
-    <div className={`${styles.videoCard} ${compact ? styles.compact : ""}`}>
-      <div className={styles.videoThumbnail}>
-        <img src={thumbnail} alt={title} />
+    <div
+      className={`${styles.videoCard} ${compact ? styles.compact : ""}`}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <div className={styles.mediaContainer}>
+        <video
+          key={videoUrl}
+          ref={videoRef}
+          className={`${styles.videoElement} ${
+            isHovered && !hasVideoError ? styles.visible : styles.hidden
+          }`}
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          poster={thumbnail}
+          onError={() => setHasVideoError(true)}
+        >
+          <source src={videoUrl} type="video/mp4" />
+        </video>
+
+        {!isHovered && (
+          <div className={styles.playButton}>
+            <FaPlay />
+          </div>
+        )}
+
         <div className={styles.videoDuration}>{duration}</div>
       </div>
+
       <div className={styles.videoInfo}>
-        <h3 className={styles.videoTitle}>{title}</h3>
+        <div className={styles.creatorInfo}>
+          <div className={styles.creatorAvatar}>{creatorInitials}</div>
+          <div>
+            <h3 className={styles.videoTitle}>{title}</h3>
+            {!compact && <p className={styles.creatorName}>{creatorName}</p>}
+          </div>
+        </div>
+
         {!compact && (
           <>
-            <div className={styles.videoCreator}>
-              <div className={styles.videoCreatorAvatar}>{creatorInitials}</div>
-              <span>{creatorName}</span>
-            </div>
             <p className={styles.videoDescription}>{description}</p>
             {tags.length > 0 && (
               <div className={styles.videoTags}>
@@ -39,13 +106,16 @@ const VideoCard = ({
             )}
           </>
         )}
+
         <div className={styles.videoStats}>
-          <span>
-            <FaHeart className={styles.statIcon} /> {likes}
-          </span>
-          <span>
-            <FaCoins className={styles.statIcon} /> {earnings} $BLESS
-          </span>
+          <div className={styles.statItem}>
+            <FaHeart className={styles.statIcon} />
+            <span>{likes.toLocaleString()}</span>
+          </div>
+          <div className={styles.statItem}>
+            <FaCoins className={styles.statIcon} />
+            <span>{earnings.toLocaleString()} $BLESS</span>
+          </div>
         </div>
       </div>
     </div>

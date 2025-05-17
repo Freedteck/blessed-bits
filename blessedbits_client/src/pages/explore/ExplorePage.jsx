@@ -10,6 +10,7 @@ import {
 } from "react-icons/fa";
 import styles from "./ExplorePage.module.css";
 import VideoCard from "../../components/shared/video-card/VideoCard";
+import { Link } from "react-router-dom";
 
 const ExplorePage = () => {
   const [activeTab, setActiveTab] = useState("trending");
@@ -33,6 +34,8 @@ const ExplorePage = () => {
       id: 1,
       thumbnail:
         "https://images.unsplash.com/photo-1545205597-3d9d02c29597?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=180&q=80",
+      videoUrl:
+        "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
       duration: "0:58",
       title: "Morning Meditation Routine",
       creatorInitials: "MG",
@@ -44,11 +47,12 @@ const ExplorePage = () => {
       category: "meditation",
       isTrending: true,
     },
-    // Add 11 more video objects following the same structure
     {
       id: 2,
       thumbnail:
-        "https://images.unsplash.com/photo-1503764654157-72d97966e920?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=180&q=80",
+        "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=180&q=80",
+      videoUrl:
+        "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
       duration: "0:45",
       title: "Daily Scripture Reflection",
       creatorInitials: "FP",
@@ -64,6 +68,8 @@ const ExplorePage = () => {
       id: 3,
       thumbnail:
         "https://images.unsplash.com/photo-1518611012118-696072aa579a?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=180&q=80",
+      videoUrl:
+        "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
       duration: "1:00",
       title: "Christian Yoga Flow",
       creatorInitials: "SL",
@@ -79,6 +85,8 @@ const ExplorePage = () => {
       id: 4,
       thumbnail:
         "https://images.unsplash.com/photo-1532629345422-7515f3d16bb6?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=180&q=80",
+      videoUrl:
+        "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
       duration: "0:52",
       title: "Evening Prayer Session",
       creatorInitials: "PW",
@@ -94,6 +102,8 @@ const ExplorePage = () => {
       id: 5,
       thumbnail:
         "https://images.unsplash.com/photo-1497250681960-ef046c08a56e?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=180&q=80",
+      videoUrl:
+        "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
       duration: "0:48",
       title: "God in Nature",
       creatorInitials: "CG",
@@ -109,6 +119,8 @@ const ExplorePage = () => {
       id: 6,
       thumbnail:
         "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=180&q=80",
+      videoUrl:
+        "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4",
       duration: "0:55",
       title: "Bible Study Tips",
       creatorInitials: "BS",
@@ -124,6 +136,8 @@ const ExplorePage = () => {
       id: 7,
       thumbnail:
         "https://images.unsplash.com/photo-1503764654157-72d97966e920?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=180&q=80",
+      videoUrl:
+        "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
       duration: "0:45",
       title: "Psalm 23 Meditation",
       creatorInitials: "SM",
@@ -139,6 +153,8 @@ const ExplorePage = () => {
       id: 8,
       thumbnail:
         "https://images.unsplash.com/photo-1545205597-3d9d02c29597?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=180&q=80",
+      videoUrl:
+        "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
       duration: "0:58",
       title: "Breath Prayer Technique",
       creatorInitials: "PP",
@@ -154,6 +170,8 @@ const ExplorePage = () => {
       id: 9,
       thumbnail:
         "https://images.unsplash.com/photo-1518611012118-696072aa579a?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=180&q=80",
+      videoUrl:
+        "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
       duration: "1:00",
       title: "Worship Movement Flow",
       creatorInitials: "WM",
@@ -169,6 +187,8 @@ const ExplorePage = () => {
       id: 10,
       thumbnail:
         "https://images.unsplash.com/photo-1532629345422-7515f3d16bb6?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=180&q=80",
+      videoUrl:
+        "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
       duration: "0:52",
       title: "Healing Testimony",
       creatorInitials: "HT",
@@ -184,6 +204,8 @@ const ExplorePage = () => {
       id: 11,
       thumbnail:
         "https://images.unsplash.com/photo-1497250681960-ef046c08a56e?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=180&q=80",
+      videoUrl:
+        "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4",
       duration: "0:48",
       title: "The Prodigal Son Explained",
       creatorInitials: "BT",
@@ -199,6 +221,8 @@ const ExplorePage = () => {
       id: 12,
       thumbnail:
         "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=180&q=80",
+      videoUrl:
+        "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
       duration: "0:55",
       title: "Praying the Scriptures",
       creatorInitials: "SP",
@@ -323,18 +347,20 @@ const ExplorePage = () => {
                 </h3>
                 <div className={styles.categoryVideos}>
                   {category.videos.map((video) => (
-                    <VideoCard
-                      key={video.id}
-                      thumbnail={video.thumbnail}
-                      duration={video.duration}
-                      title={video.title}
-                      creatorInitials={video.creatorInitials}
-                      creatorName={video.creatorName}
-                      description={video.description}
-                      likes={video.likes}
-                      earnings={video.earnings}
-                      compact
-                    />
+                    <Link to={`/app/video/${video.id}`} key={video.id}>
+                      <VideoCard
+                        thumbnail={video.thumbnail}
+                        videoUrl={video.videoUrl}
+                        duration={video.duration}
+                        title={video.title}
+                        creatorInitials={video.creatorInitials}
+                        creatorName={video.creatorName}
+                        description={video.description}
+                        likes={video.likes}
+                        earnings={video.earnings}
+                        compact
+                      />
+                    </Link>
                   ))}
                 </div>
               </div>
@@ -348,17 +374,19 @@ const ExplorePage = () => {
         {filteredVideos.length > 0 ? (
           <div className={styles.videoGrid}>
             {filteredVideos.map((video) => (
-              <VideoCard
-                key={video.id}
-                thumbnail={video.thumbnail}
-                duration={video.duration}
-                title={video.title}
-                creatorInitials={video.creatorInitials}
-                creatorName={video.creatorName}
-                description={video.description}
-                likes={video.likes}
-                earnings={video.earnings}
-              />
+              <Link to={`/app/video/${video.id}`} key={video.id}>
+                <VideoCard
+                  thumbnail={video.thumbnail}
+                  videoUrl={video.videoUrl}
+                  duration={video.duration}
+                  title={video.title}
+                  creatorInitials={video.creatorInitials}
+                  creatorName={video.creatorName}
+                  description={video.description}
+                  likes={video.likes}
+                  earnings={video.earnings}
+                />
+              </Link>
             ))}
           </div>
         ) : (
