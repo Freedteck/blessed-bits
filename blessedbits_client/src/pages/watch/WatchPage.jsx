@@ -23,6 +23,7 @@ import {
   useSuiClient,
 } from "@mysten/dapp-kit";
 import { useVideoVotingData } from "../../hooks/useVideoVotingData";
+import { useSocialData } from "../../hooks/useSocialData";
 
 const WatchPage = () => {
   const { videoId } = useParams();
@@ -30,11 +31,13 @@ const WatchPage = () => {
   const [showTipModal, setShowTipModal] = useState(false);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
-  const { packageId, platformStateId, treasuryCapId } = useNetworkVariables(
-    "packageId",
-    "platformStateId",
-    "treasuryCapId"
-  );
+  const { packageId, platformStateId, treasuryCapId, badgeCollectionId } =
+    useNetworkVariables(
+      "packageId",
+      "platformStateId",
+      "treasuryCapId",
+      "badgeCollectionId"
+    );
   const account = useCurrentAccount();
   const suiClient = useSuiClient();
   const { mutate: signAndExecute } = useSignAndExecuteTransaction();
@@ -45,9 +48,12 @@ const WatchPage = () => {
     videoId,
     account?.address
   );
+  const { isFollowing } = useSocialData(platformStateId, account?.address);
+
+  const isFollowingUser = isFollowing(video?.creator);
 
   const { userProfile, videos } = useUserData(platformStateId, video?.creator);
-  const { vote } = useCreateContent(
+  const { vote, followUser } = useCreateContent(
     packageId,
     platformStateId,
     suiClient,
@@ -82,10 +88,13 @@ const WatchPage = () => {
     const voteValue = userVote === null ? true : false;
 
     vote(videoId, voteValue, treasuryCapId, () => {
-      // This function will be called after the vote completes
       refetch();
-      console.log("Vote registered and data refreshed");
     });
+  };
+
+  const handleFollow = () => {
+    const followValue = isFollowingUser ? false : true;
+    followUser(video?.creator, followValue, badgeCollectionId, () => refetch());
   };
 
   const handleCommentSubmit = (e) => {
@@ -181,8 +190,8 @@ const WatchPage = () => {
           {/* Creator Info */}
           <CreatorCard
             creator={userProfile}
-            isFollowing={false}
-            onFollow={() => console.log("Followed")}
+            isFollowing={isFollowingUser}
+            onFollow={handleFollow}
           />
 
           {/* Video Description */}
@@ -218,7 +227,7 @@ const WatchPage = () => {
       {/* Tip Modal */}
       {showTipModal && (
         <TipModal
-          creatorName={video?.creator}
+          creatorName={userProfile?.username}
           onClose={() => setShowTipModal(false)}
           onTipSubmit={(amount) => {
             console.log(`Tipped ${amount} $BLESS`);
