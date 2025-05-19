@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   FaUser,
   FaShieldAlt,
@@ -11,6 +11,14 @@ import {
 } from "react-icons/fa";
 import styles from "./SettingsPage.module.css";
 import Button from "../../components/shared/button/Button";
+import { useUserData } from "../../hooks/useUserData";
+import { useNetworkVariables } from "../../config/networkConfig";
+import {
+  useCurrentAccount,
+  useSignAndExecuteTransaction,
+  useSuiClient,
+} from "@mysten/dapp-kit";
+import useCreateContent from "../../hooks/useCreateContent";
 
 const SettingsPage = () => {
   const [activeTab, setActiveTab] = useState("profile");
@@ -19,6 +27,35 @@ const SettingsPage = () => {
   const [is2FAEnabled, setIs2FAEnabled] = useState(false);
   const [showAvatarModal, setShowAvatarModal] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState(null);
+  const { packageId, platformStateId } = useNetworkVariables(
+    "packageId",
+    "platformStateId"
+  );
+  const account = useCurrentAccount();
+
+  const { userProfile, isPending, refetch } = useUserData(
+    platformStateId,
+    account?.address
+  );
+
+  const { mutate: signAndExecute } = useSignAndExecuteTransaction();
+  const suiClient = useSuiClient();
+  const { updateProfile } = useCreateContent(
+    packageId,
+    platformStateId,
+    suiClient,
+    signAndExecute
+  );
+
+  const noChanges =
+    displayName === userProfile?.username && bio === userProfile?.bio;
+
+  useEffect(() => {
+    if (userProfile) {
+      setDisplayName(userProfile?.username);
+      setBio(userProfile?.bio);
+    }
+  }, [userProfile]);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -33,6 +70,14 @@ const SettingsPage = () => {
 
   const handleRemoveAvatar = () => {
     setAvatarPreview(null);
+  };
+
+  const handleSaveChanges = () => {
+    if (noChanges) return;
+    updateProfile(displayName, bio, () => {
+      refetch();
+      setAvatarPreview(null);
+    });
   };
 
   const tabs = [
@@ -86,7 +131,13 @@ const SettingsPage = () => {
                 onChange={(e) => setBio(e.target.value)}
               />
             </div>
-            <Button variant="primary">Save Changes</Button>
+            <Button
+              variant="primary"
+              disabled={isPending || noChanges}
+              onClick={handleSaveChanges}
+            >
+              {isPending ? "Saving..." : "Save Changes"}
+            </Button>
           </div>
 
           <div className={styles.card}>
@@ -96,12 +147,15 @@ const SettingsPage = () => {
                 {avatarPreview ? (
                   <img src={avatarPreview} alt="Profile preview" />
                 ) : (
-                  <div className={styles.initialsAvatar}>JD</div>
+                  <div className={styles.initialsAvatar}>
+                    {userProfile?.username.slice(0, 2).toUpperCase()}
+                  </div>
                 )}
               </div>
               <div className={styles.uploadActions}>
                 <Button
                   variant="outline"
+                  disabled={true}
                   onClick={() => setShowAvatarModal(true)}
                 >
                   <FaUpload /> Change

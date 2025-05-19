@@ -19,31 +19,61 @@ import { WalletContext } from "../../components/context/walletContext";
 import useCreateContent from "../../hooks/useCreateContent";
 import { uploadFile } from "../../utils/walrusService";
 
+// Recommended tags that will be suggested as users type
+const RECOMMENDED_TAGS = [
+  "Prayer",
+  "Faith",
+  "Bible",
+  "Gospel",
+  "Christian",
+  "Worship",
+  "Devotional",
+  "Inspiration",
+  "Testimony",
+  "Hope",
+  "Love",
+  "Peace",
+  "Joy",
+  "Salvation",
+  "Scripture",
+  "Muslim",
+  "Islam",
+  "Quran",
+  "Salah",
+  "Dua",
+  "Hadith",
+  "Zakat",
+  "Sadaqah",
+  "Wisdom",
+  "Music",
+];
+
 const UploadPage = () => {
   const [file, setFile] = useState(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [tags, setTags] = useState(["Prayer", "Faith"]);
   const [newTag, setNewTag] = useState("");
-  const [isMonetized, setIsMonetized] = useState(true);
+  const [tagSuggestions, setTagSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  // const [isMonetized, setIsMonetized] = useState(true);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef(null);
+  const tagInputRef = useRef(null);
   const { blessBalance } = useContext(WalletContext);
   const navigate = useNavigate();
 
   const packageId = useNetworkVariable("packageId");
-
-  const { platformStateId, treasuryCapId, badgeCollectionId } =
-    useNetworkVariables(
-      "platformStateId",
-      "treasuryCapId",
-      "badgeCollectionId"
-    );
+  const { platformStateId, badgeCollectionId } = useNetworkVariables(
+    "platformStateId",
+    "treasuryCapId",
+    "badgeCollectionId"
+  );
   const suiClient = useSuiClient();
   const { mutate: signAndExecute, isPending } = useSignAndExecuteTransaction();
 
-  const { claimDailyCashback, uploadVideo } = useCreateContent(
+  const { uploadVideo } = useCreateContent(
     packageId,
     platformStateId,
     suiClient,
@@ -65,13 +95,40 @@ const UploadPage = () => {
     setTags(tags.filter((tag) => tag !== tagToRemove));
   };
 
-  const handleTagAdd = (e) => {
-    if (e.key === "Enter" && newTag.trim()) {
-      if (!tags.includes(newTag.trim())) {
-        setTags([...tags, newTag.trim()]);
-      }
-      setNewTag("");
+  const handleTagInputChange = (e) => {
+    const value = e.target.value;
+    setNewTag(value);
+
+    if (value) {
+      const filtered = RECOMMENDED_TAGS.filter(
+        (tag) =>
+          tag.toLowerCase().includes(value.toLowerCase()) && !tags.includes(tag)
+      );
+      setTagSuggestions(filtered);
+      setShowSuggestions(true);
+    } else {
+      setTagSuggestions([]);
+      setShowSuggestions(false);
     }
+  };
+
+  const handleTagAdd = (tag) => {
+    if (tag && !tags.includes(tag)) {
+      setTags([...tags, tag]);
+      setNewTag("");
+      setTagSuggestions([]);
+      setShowSuggestions(false);
+    }
+  };
+
+  const handleTagKeyDown = (e) => {
+    if (e.key === "Enter" && newTag.trim()) {
+      handleTagAdd(newTag.trim());
+    }
+  };
+
+  const handleSuggestionClick = (tag) => {
+    handleTagAdd(tag);
   };
 
   const handleUpload = async () => {
@@ -80,44 +137,44 @@ const UploadPage = () => {
     setIsUploading(true);
     setUploadProgress(0);
 
-    const videoUrl = await uploadFile(file);
-    uploadVideo(
-      videoUrl,
-      "",
-      badgeCollectionId,
-      title,
-      description,
-      tags,
-      () => {
-        setFile(null);
-        setTitle("");
-        setDescription("");
-        setTags(["Prayer", "Faith"]);
-        setNewTag("");
-        setIsMonetized(true);
-        setUploadProgress(0);
-        setIsUploading(false);
-        navigate("/app");
-      }
-    );
-
-    // Simulate upload progress
-    const interval = setInterval(() => {
-      setUploadProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval);
+    try {
+      const videoUrl = await uploadFile(file);
+      uploadVideo(
+        videoUrl,
+        "",
+        badgeCollectionId,
+        title,
+        description,
+        tags,
+        () => {
+          setFile(null);
+          setTitle("");
+          setDescription("");
+          setTags(["Prayer", "Faith"]);
+          setNewTag("");
+          // setIsMonetized(true);
+          setUploadProgress(0);
           setIsUploading(false);
-          return 100;
+          navigate("/app");
         }
-        return prev + 10;
-      });
-    }, 300);
-  };
+      );
 
-  const handleClaim = () => {
-    claimDailyCashback(treasuryCapId, () => {
-      console.log("Claimed daily cashback successfully!");
-    });
+      // Simulate upload progress
+      const interval = setInterval(() => {
+        setUploadProgress((prev) => {
+          if (prev >= 100) {
+            clearInterval(interval);
+            setIsUploading(false);
+            return 100;
+          }
+          return prev + 10;
+        });
+      }, 300);
+    } catch (error) {
+      console.error("Upload failed:", error);
+      setIsUploading(false);
+      setUploadProgress(0);
+    }
   };
 
   return (
@@ -128,7 +185,6 @@ const UploadPage = () => {
           <FaWallet />
           <span>{blessBalance} $BLESS</span>
         </div>
-        <button onClick={handleClaim}>{isPending ? "Pending" : "Claim"}</button>
       </header>
 
       <div className={styles.uploadContainer}>
@@ -182,34 +238,52 @@ const UploadPage = () => {
           ></textarea>
         </div>
 
-        {/* Tags Input */}
+        {/* Tags Input with Suggestions */}
         <div className={styles.formGroup}>
-          <label>Tags (AI Suggestions)</label>
-          <div className={styles.tagInput}>
-            {tags.map((tag) => (
-              <div key={tag} className={styles.tag}>
-                #{tag}
-                <button
-                  className={styles.tagRemove}
-                  onClick={() => handleTagRemove(tag)}
-                >
-                  <FaTimes />
-                </button>
+          <label>Tags</label>
+          <div className={styles.tagInputContainer}>
+            <div className={styles.tagInput}>
+              {tags.map((tag) => (
+                <div key={tag} className={styles.tag}>
+                  #{tag}
+                  <button
+                    className={styles.tagRemove}
+                    onClick={() => handleTagRemove(tag)}
+                  >
+                    <FaTimes />
+                  </button>
+                </div>
+              ))}
+              <input
+                type="text"
+                ref={tagInputRef}
+                placeholder="Add tags..."
+                className={styles.tagInputField}
+                value={newTag}
+                onChange={handleTagInputChange}
+                onKeyDown={handleTagKeyDown}
+                onFocus={() => newTag && setShowSuggestions(true)}
+                onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+              />
+            </div>
+            {showSuggestions && tagSuggestions.length > 0 && (
+              <div className={styles.tagSuggestions}>
+                {tagSuggestions.map((tag) => (
+                  <div
+                    key={tag}
+                    className={styles.tagSuggestion}
+                    onClick={() => handleSuggestionClick(tag)}
+                  >
+                    {tag}
+                  </div>
+                ))}
               </div>
-            ))}
-            <input
-              type="text"
-              placeholder="Add tags..."
-              className={styles.tagInputField}
-              value={newTag}
-              onChange={(e) => setNewTag(e.target.value)}
-              onKeyDown={handleTagAdd}
-            />
+            )}
           </div>
         </div>
 
         {/* Monetization Toggle */}
-        <div className={styles.formGroup}>
+        {/* <div className={styles.formGroup}>
           <label>Monetization</label>
           <div className={styles.toggleSwitch}>
             <input
@@ -220,11 +294,10 @@ const UploadPage = () => {
             />
             <label htmlFor="monetize">Earn $BLESS from votes</label>
           </div>
-        </div>
+        </div> */}
 
         {/* Upload Actions */}
         <div className={styles.uploadActions}>
-          {/* <Button variant="outline">Save Draft</Button> */}
           <Button
             variant="primary"
             onClick={handleUpload}
