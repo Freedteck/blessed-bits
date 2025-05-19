@@ -9,6 +9,7 @@ import ProfilePage from "./pages/profile/ProfilePage";
 import BadgesPage from "./pages/badges/BadgesPage";
 import SettingsPage from "./pages/settings/SettingsPage";
 import ExplorePage from "./pages/explore/ExplorePage";
+import OnboardingPage from "./pages/onboarding/OnboardingPage";
 
 export const router = createBrowserRouter([
   {
@@ -50,6 +51,10 @@ export const router = createBrowserRouter([
       {
         path: "settings",
         Component: SettingsPage,
+      },
+      {
+        path: "register",
+        Component: OnboardingPage,
       },
     ],
   },

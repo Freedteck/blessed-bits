@@ -13,9 +13,14 @@ const Input = ({
 }) => {
   return (
     <div className={`${styles.formGroup} ${className}`}>
-      {label && <label className={styles.label}>{label}</label>}
+      {label && (
+        <label className={styles.label} htmlFor={props.id}>
+          {label}
+        </label>
+      )}
       <div className={styles.inputContainer}>
         <input
+          id={props.id}
           type={type}
           placeholder={placeholder}
           className={styles.input}

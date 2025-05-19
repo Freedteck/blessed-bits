@@ -2,14 +2,42 @@ import Sidebar from "./components/shared/sidebar/Sidebar";
 import { Outlet } from "react-router-dom";
 import styles from "./App.module.css";
 import ScrollToTop from "./utils/ScrollToTop";
+import { Toaster } from "react-hot-toast";
+import { useEffect, useState } from "react";
+import { useCurrentAccount, useSuiClient } from "@mysten/dapp-kit";
+import { getBlessBalance } from "./utils/balance";
+import { useNetworkVariable } from "./config/networkConfig";
+import { WalletContext } from "./components/context/walletContext";
 
 function App() {
+  const [balance, setBalance] = useState(0);
+  const account = useCurrentAccount();
+  const suiClient = useSuiClient();
+  const packageId = useNetworkVariable("packageId");
+
+  useEffect(() => {
+    const fetchBlessBalance = async () => {
+      if (account?.address) {
+        const balance = await getBlessBalance(
+          suiClient,
+          account.address,
+          packageId
+        );
+        setBalance(balance.toString());
+      }
+    };
+
+    fetchBlessBalance();
+  }, [account, packageId, suiClient]);
   return (
-    <div className={styles.container}>
-      <ScrollToTop />
-      <Sidebar />
-      <Outlet />
-    </div>
+    <WalletContext.Provider value={{ blessBalance: balance }}>
+      <div className={styles.container}>
+        <ScrollToTop />
+        <Toaster position="top-center" />
+        <Sidebar />
+        <Outlet />
+      </div>
+    </WalletContext.Provider>
   );
 }
 

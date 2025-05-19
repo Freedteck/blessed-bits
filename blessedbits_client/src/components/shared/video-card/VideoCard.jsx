@@ -1,23 +1,25 @@
 import { FaHeart, FaCoins, FaPlay } from "react-icons/fa";
 import { useEffect, useRef, useState } from "react";
 import styles from "./VideoCard.module.css";
+import { useNetworkVariable } from "../../../config/networkConfig";
+import { useUserData } from "../../../hooks/useUserData";
 
 const VideoCard = ({
   videoUrl,
   thumbnail,
   duration,
   title,
-  creatorInitials,
-  creatorName,
+  creator,
   description,
   likes,
-  earnings,
   tags = [],
   compact = false,
 }) => {
   const videoRef = useRef(null);
   const [isHovered, setIsHovered] = useState(false);
   const [hasVideoError, setHasVideoError] = useState(false);
+  const platformStateId = useNetworkVariable("platformStateId");
+  const { userProfile } = useUserData(platformStateId, creator);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -85,10 +87,14 @@ const VideoCard = ({
 
       <div className={styles.videoInfo}>
         <div className={styles.creatorInfo}>
-          <div className={styles.creatorAvatar}>{creatorInitials}</div>
+          <div className={styles.creatorAvatar}>
+            {userProfile?.username.slice(0, 2)}
+          </div>
           <div>
             <h3 className={styles.videoTitle}>{title}</h3>
-            {!compact && <p className={styles.creatorName}>{creatorName}</p>}
+            {!compact && (
+              <p className={styles.creatorName}>{userProfile?.username}</p>
+            )}
           </div>
         </div>
 
@@ -111,10 +117,6 @@ const VideoCard = ({
           <div className={styles.statItem}>
             <FaHeart className={styles.statIcon} />
             <span>{likes.toLocaleString()}</span>
-          </div>
-          <div className={styles.statItem}>
-            <FaCoins className={styles.statIcon} />
-            <span>{earnings.toLocaleString()} $BLESS</span>
           </div>
         </div>
       </div>

@@ -4,10 +4,7 @@ import {
   FaCoins,
   FaShareAlt,
   FaBookmark,
-  FaEye,
-  FaComments,
   FaArrowLeft,
-  FaUsers,
 } from "react-icons/fa";
 import { useParams, useNavigate } from "react-router-dom";
 import styles from "./WatchPage.module.css";
@@ -16,58 +13,46 @@ import CreatorCard from "../../components/watch/creator-card/CreatorCard";
 import CommentSection from "../../components/watch/comment-section/CommentSection";
 import RelatedVideos from "../../components/watch/related-videos/RelatedVideos";
 import TipModal from "../../components/watch/tip-modal/TipModal";
+import { useNetworkVariables } from "../../config/networkConfig";
+import { useVideoData } from "../../hooks/useVideoData";
+import { useUserData } from "../../hooks/useUserData";
+import useCreateContent from "../../hooks/useCreateContent";
+import {
+  useCurrentAccount,
+  useSignAndExecuteTransaction,
+  useSuiClient,
+} from "@mysten/dapp-kit";
+import { useVideoVotingData } from "../../hooks/useVideoVotingData";
 
 const WatchPage = () => {
   const { videoId } = useParams();
   const navigate = useNavigate();
-  const [videoData, setVideoData] = useState(null);
-  const [isLiked, setIsLiked] = useState(false);
-  const [likeCount, setLikeCount] = useState(0);
   const [showTipModal, setShowTipModal] = useState(false);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
+  const { packageId, platformStateId, treasuryCapId } = useNetworkVariables(
+    "packageId",
+    "platformStateId",
+    "treasuryCapId"
+  );
+  const account = useCurrentAccount();
+  const suiClient = useSuiClient();
+  const { mutate: signAndExecute } = useSignAndExecuteTransaction();
 
-  // Fetch video data (in a real app, this would be an API call)
-  useEffect(() => {
-    // Mock data fetch
-    const fetchVideoData = async () => {
-      // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 300));
+  const { video, isPending, refetch } = useVideoData(platformStateId, videoId);
+  const { likes, userVote } = useVideoVotingData(
+    platformStateId,
+    videoId,
+    account?.address
+  );
 
-      const mockVideoData = {
-        id: videoId,
-        title: "Evening Prayer Session",
-        description:
-          "Wind down your day with this peaceful prayer. Perfect for reflection before sleep. Remember to like if this blessed you!",
-        videoUrl:
-          "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4", // In real app, this would be the actual video URL
-        thumbnail:
-          "https://images.unsplash.com/photo-1532629345422-7515f3d16bb6?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&h=675&q=80",
-        duration: "0:52",
-        views: 1245,
-        uploadDate: "3 days ago",
-        creator: {
-          id: "prayerwarrior",
-          name: "PrayerWarrior",
-          initials: "PW",
-          followers: "1.7K followers",
-        },
-        tags: ["prayer", "christian", "faith"],
-        earnings: {
-          tokens: 58,
-          votes: 201,
-        },
-        likes: 245,
-        isLiked: false,
-      };
-
-      setVideoData(mockVideoData);
-      setLikeCount(mockVideoData.likes);
-      setIsLiked(mockVideoData.isLiked);
-    };
-
-    fetchVideoData();
-  }, [videoId]);
+  const { userProfile, videos } = useUserData(platformStateId, video?.creator);
+  const { vote } = useCreateContent(
+    packageId,
+    platformStateId,
+    suiClient,
+    signAndExecute
+  );
 
   // Mock comments data
   useEffect(() => {
@@ -94,12 +79,13 @@ const WatchPage = () => {
   }, []);
 
   const handleLike = () => {
-    if (isLiked) {
-      setLikeCount((prev) => prev - 1);
-    } else {
-      setLikeCount((prev) => prev + 1);
-    }
-    setIsLiked(!isLiked);
+    const voteValue = userVote === null ? true : false;
+
+    vote(videoId, voteValue, treasuryCapId, () => {
+      // This function will be called after the vote completes
+      refetch();
+      console.log("Vote registered and data refreshed");
+    });
   };
 
   const handleCommentSubmit = (e) => {
@@ -135,7 +121,7 @@ const WatchPage = () => {
     );
   };
 
-  if (!videoData) {
+  if (isPending) {
     return <div className={styles.loading}>Loading...</div>;
   }
 
@@ -149,20 +135,17 @@ const WatchPage = () => {
         {/* Video Player */}
         <div className={styles.videoPlayerWrapper}>
           <VideoPlayer
-            src={videoData.videoUrl}
-            poster={videoData.thumbnail}
-            title={videoData.title}
+            src={video?.video_url}
+            poster={video?.thumbnail_url}
+            title={video?.title}
           />
 
           {/* Video Info */}
           <div className={styles.videoHeader}>
-            <h1>{videoData.title}</h1>
+            <h1>{video?.title}</h1>
             <div className={styles.videoMeta}>
-              <span className={styles.views}>
-                <FaEye /> {videoData.views.toLocaleString()} views
-              </span>
               <span className={styles.uploadDate}>
-                Uploaded {videoData.uploadDate}
+                Uploaded {video?.created_at}
               </span>
             </div>
           </div>
@@ -171,12 +154,12 @@ const WatchPage = () => {
           <div className={styles.videoActions}>
             <button
               className={`${styles.actionBtn} ${styles.likeBtn} ${
-                isLiked ? styles.active : ""
+                userVote ? styles.active : ""
               }`}
               onClick={handleLike}
             >
               <FaHeart />
-              <span>{likeCount.toLocaleString()}</span>
+              <span>{likes.toLocaleString()}</span>
             </button>
             <button
               className={styles.actionBtn}
@@ -197,38 +180,20 @@ const WatchPage = () => {
 
           {/* Creator Info */}
           <CreatorCard
-            creator={videoData.creator}
+            creator={userProfile}
             isFollowing={false}
             onFollow={() => console.log("Followed")}
           />
 
           {/* Video Description */}
           <div className={styles.videoDescription}>
-            <p>{videoData.description}</p>
+            <p>{video?.description}</p>
             <div className={styles.videoTags}>
-              {videoData.tags.map((tag) => (
+              {video?.tags.map((tag) => (
                 <span key={tag} className={styles.tag}>
                   #{tag}
                 </span>
               ))}
-            </div>
-          </div>
-
-          {/* Earnings Card */}
-          <div className={styles.earningsCard}>
-            <div className={styles.earningItem}>
-              <FaCoins className={styles.earningIcon} />
-              <div>
-                <h4>{videoData.earnings.tokens} $BLESS</h4>
-                <p>Earned from this video</p>
-              </div>
-            </div>
-            <div className={styles.earningItem}>
-              <FaUsers className={styles.earningIcon} />
-              <div>
-                <h4>{videoData.earnings.votes} votes</h4>
-                <p>Community engagement</p>
-              </div>
             </div>
           </div>
 
@@ -245,13 +210,15 @@ const WatchPage = () => {
 
       {/* Related Videos Column */}
       <RelatedVideos
-        currentVideoId={videoId}
-        creatorId={videoData.creator.id}
+        relatedVideos={videos
+          .filter((vid) => vid.id.id !== videoId)
+          .slice(0, 5)}
+        creator={userProfile?.username}
       />
       {/* Tip Modal */}
       {showTipModal && (
         <TipModal
-          creatorName={videoData.creator.name}
+          creatorName={video?.creator}
           onClose={() => setShowTipModal(false)}
           onTipSubmit={(amount) => {
             console.log(`Tipped ${amount} $BLESS`);

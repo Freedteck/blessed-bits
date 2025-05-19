@@ -40,6 +40,19 @@ const BLESS_PER_SUI: u64 = 10000; // 10,000 $BLESS per 1 SUI (0.1 SUI = 1,000 $B
 // ====== STRUCTS ======
 public struct BLESSEDBITS has drop {}
 
+public struct AdminCap has key, store {
+    id: UID
+}
+
+public struct PlatformConfig has key, store {
+    id: UID,
+    daily_cashback_amount: u64,
+    min_purchase_amount: u64,
+    bless_per_sui: u64,
+    daily_rewards_base: u64,
+    staking_reward_percent: u64
+}
+
 public struct UserProfile has key, store {
     id: UID,
     username: String,
@@ -204,7 +217,27 @@ fun init(witness: BLESSEDBITS, ctx: &mut TxContext) {
     );
 
     transfer::public_freeze_object(metadata);
-    transfer::public_transfer(treasury_cap, tx_context::sender(ctx));
+    transfer::public_share_object(treasury_cap);
+
+    // Create admin capability
+    let admin_cap = AdminCap {
+        id: object::new(ctx)
+    };
+    
+    // Transfer admin cap to the deployer
+    transfer::transfer(admin_cap, tx_context::sender(ctx));
+    
+    // Create platform config with default values
+    let platform_config = PlatformConfig {
+        id: object::new(ctx),
+        daily_cashback_amount: 10,
+        min_purchase_amount: 100,
+        bless_per_sui: 10000,
+        daily_rewards_base: 100000,
+        staking_reward_percent: 10
+    };
+    
+    transfer::share_object(platform_config);
 
     let platform_state = PlatformState {
         id: object::new(ctx),
@@ -216,17 +249,17 @@ fun init(witness: BLESSEDBITS, ctx: &mut TxContext) {
         user_profiles: vec_map::empty(),
         daily_rewards_pool: 100000, // 100,000 $BLESS daily pool
         last_distribution: 0,
-        last_staking_distribution: 0, // Initialize new field
-        total_staked: 0              // Initialize new field
+        last_staking_distribution: 0,
+        total_staked: 0
     };
 
     transfer::share_object(platform_state);
 
     let badge_collection = BadgeCollection {
-            id: object::new(ctx),
-            badges: vec_map::empty()
-        };
-        transfer::share_object(badge_collection);
+        id: object::new(ctx),
+        badges: vec_map::empty()
+    };
+    transfer::share_object(badge_collection);
 }
 
 // ====== USER MANAGEMENT ======
@@ -325,24 +358,67 @@ public entry fun delete_video(
     ctx: &mut TxContext
 ) {
     let sender = tx_context::sender(ctx);
+    
+    // First check if video exists and belongs to sender
+    assert!(vec_map::contains(&platform.videos, &video_id), EBadgeNotFound);
     let video = vec_map::get(&platform.videos, &video_id);
     assert!(video.creator == sender, ENotOwner);
     
-    // Properly handle the removed video
+    // Now properly remove and delete
     let (_, video) = vec_map::remove(&mut platform.videos, &video_id);
-    let Video { id, .. } = video;
+    
+    // Destructure the Video struct and delete the UID
+    let Video { 
+        id,
+        creator: _,
+        video_url: _,
+        thumbnail_url: _,
+        title: _,
+        description: _,
+        tags: _,
+        likes: _,
+        dislikes: _,
+        total_rewards: _,
+        voters: _,
+        created_at: _
+    } = video;
+    
+    // Delete the UID
     object::delete(id);
+    
+    // Update video count
     platform.video_count = platform.video_count - 1;
+}
+
+public entry fun update_platform_config(
+    config: &mut PlatformConfig,
+    admin_cap: &AdminCap,
+    daily_cashback_amount: u64,
+    min_purchase_amount: u64,
+    bless_per_sui: u64,
+    daily_rewards_base: u64,
+    staking_reward_percent: u64,
+    _ctx: &mut TxContext
+) {
+    // Only admin can update config
+    let _ = admin_cap;
+    
+    config.daily_cashback_amount = daily_cashback_amount;
+    config.min_purchase_amount = min_purchase_amount;
+    config.bless_per_sui = bless_per_sui;
+    config.daily_rewards_base = daily_rewards_base;
+    config.staking_reward_percent = staking_reward_percent;
 }
 
 public entry fun refresh_daily_pool(
     platform: &mut PlatformState,
+    config: &PlatformConfig,
     clock: &Clock
 ) {
     let current_time = clock::timestamp_ms(clock);
     if (current_time - platform.last_distribution > MILLISECONDS_PER_DAY) { // 24h
         // Base amount + whatever was accumulated from purchases/tips
-        platform.daily_rewards_pool = 100000 + platform.daily_rewards_pool;
+        platform.daily_rewards_pool = config.daily_rewards_base + platform.daily_rewards_pool;
         platform.last_distribution = current_time;
     }
 }
@@ -507,15 +583,17 @@ public entry fun vote(
     platform: &mut PlatformState,
     video_id: ID,
     is_like: bool,
-    mut tokens: Coin<BLESSEDBITS>,  // User pays fee with these tokens
+    mut tokens: Coin<BLESSEDBITS>,
     treasury_cap: &mut TreasuryCap<BLESSEDBITS>,
-    clock: &Clock,
+    _clock: &Clock,
     ctx: &mut TxContext
 ) {
     let sender = tx_context::sender(ctx);
     assert!(vec_map::contains(&platform.user_profiles, &sender), EUserNotFound);
-
-    let video: &mut Video = dynamic_field::borrow_mut(&mut platform.id, video_id);
+    assert!(vec_map::contains(&platform.videos, &video_id), EBadgeNotFound); // Check if video exists
+    
+    // FIXED: Using vec_map to access videos
+    let video = vec_map::get_mut(&mut platform.videos, &video_id);
     assert!(!vec_map::contains(&video.voters, &sender), EAlreadyVoted);
     assert!(video.creator != sender, ENotCreator); // Can't vote on own video
 
@@ -680,6 +758,7 @@ public entry fun award_badge(
     clock: &Clock,
     ctx: &mut TxContext
 ) {
+    // FIXED: Check if user ALREADY has the badge (not the opposite)
     assert!(!has_badge(badge_collection, recipient, copy badge_type), EBadgeNotFound);
 
     let badge_id = object::new(ctx);
@@ -716,15 +795,22 @@ public entry fun distribute_staker_rewards(
         return
     };
     
+    // FIXED: Update timestamp regardless of distribution success
+    platform.last_staking_distribution = current_time;
+    
     // Check if there are any staked tokens
     if (platform.total_staked == 0) {
-        // No one is staking, update timestamp and return
-        platform.last_staking_distribution = current_time;
+        // No one is staking, we already updated timestamp, so just return
         return
     };
     
     // Calculate rewards (10% of daily pool)
     let rewards_to_distribute = (platform.daily_rewards_pool * 10) / 100;
+    
+    // Skip if no rewards to distribute
+    if (rewards_to_distribute == 0) {
+        return
+    };
     
     // Distribute rewards proportionally to each staker
     let user_addresses = vec_map::keys(&platform.user_profiles);
@@ -758,9 +844,6 @@ public entry fun distribute_staker_rewards(
     
     // Update pool after distribution
     platform.daily_rewards_pool = platform.daily_rewards_pool - rewards_to_distribute;
-    
-    // Reset distribution time
-    platform.last_staking_distribution = current_time;
 }
 
 // ====== SOCIAL FEATURES ======
@@ -799,8 +882,8 @@ public entry fun follow_user(
 // ====== HELPER FUNCTIONS ======
 /// Internal function - Checks and awards badges automatically
 fun check_achievements(
-    platform: &PlatformState,          // Immutable ref (read-only)
-    badge_collection: &mut BadgeCollection, // Mutable ref (for adding badges)
+    platform: &PlatformState,
+    badge_collection: &mut BadgeCollection,
     user: address,
     clock: &Clock,
     ctx: &mut TxContext
@@ -859,11 +942,61 @@ fun check_achievements(
         );
     };
 
-    // (5) Blessed Creator Badge (1000+ BLESS Earned)
+    // IMPLEMENTED: (5) Blessed Creator Badge (1000+ BLESS Earned)
+    if (user_profile.total_cashback_claimed >= 1000 &&
+       !has_badge(badge_collection, user, utf8(b"BlessedCreator"))) {
+        award_badge(
+            badge_collection,
+            utf8(b"BlessedCreator"),
+            utf8(b"Earned 1000+ BLESS tokens"),
+            user,
+            clock,
+            ctx
+        );
+    };
 
-    // (6) Heartfelt Creator Badge (100+ likes)
+    // IMPLEMENTED: (6) Heartfelt Creator Badge (100+ likes)
+    // We need to calculate total likes across all videos
+    let mut total_likes = 0;
+    let video_ids = vec_map::keys(&platform.videos);
+    let video_count = vector::length(&video_ids);
+    
+    let mut i = 0;
+    while (i < video_count) {
+        let video_id = *vector::borrow(&video_ids, i);
+        let video = vec_map::get(&platform.videos, &video_id);
+        
+        if (video.creator == user) {
+            total_likes = total_likes + video.likes;
+        };
+        
+        i = i + 1;
+    };
+    
+    if (total_likes >= 100 &&
+       !has_badge(badge_collection, user, utf8(b"HeartfeltCreator"))) {
+        award_badge(
+            badge_collection,
+            utf8(b"HeartfeltCreator"),
+            utf8(b"Received 100+ likes on your content"),
+            user,
+            clock,
+            ctx
+        );
+    };
 
-    // (7) 1k Followers Badge (1000+ followers)
+    // IMPLEMENTED: (7) 1k Followers Badge (1000+ followers)
+    if (vector::length(&user_profile.followers) >= 1000 &&
+       !has_badge(badge_collection, user, utf8(b"ThousandFollowers"))) {
+        award_badge(
+            badge_collection,
+            utf8(b"ThousandFollowers"),
+            utf8(b"Gained 1000+ followers"),
+            user,
+            clock,
+            ctx
+        );
+    };
 }
 
 
@@ -918,7 +1051,7 @@ public fun has_badge(
         let badge = vec_map::get(&badge_collection.badges, &badge_id);
         
         if (badge.awarded_to == user && badge.badge_type == badge_type) {
-            return true;
+            return true
         };
         i = i + 1;
     };

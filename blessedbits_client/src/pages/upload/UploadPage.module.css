@@ -172,6 +172,11 @@ textarea.formControl {
   display: flex;
   gap: var(--space-md);
   margin-top: var(--space-xl);
+  width: 100%;
+}
+
+.uploadActions button {
+  flex: 1;
 }
 
 .uploadProgress {

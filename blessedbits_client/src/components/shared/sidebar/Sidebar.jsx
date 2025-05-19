@@ -10,6 +10,7 @@ import {
 } from "react-icons/fa";
 import styles from "./Sidebar.module.css";
 import { NavLink } from "react-router-dom";
+import { ConnectButton } from "@mysten/dapp-kit";
 
 const Sidebar = () => {
   const navLinks = [
@@ -48,13 +49,14 @@ const Sidebar = () => {
       </nav>
 
       <div className={styles.navFooter}>
-        <div className={styles.userProfile}>
+        {/* <div className={styles.userProfile}>
           <div className={styles.userAvatar}>JD</div>
           <div>
             <div className={styles.username}>JohnDoe</div>
             <div className={styles.walletAddress}>0x1a2...3b4c</div>
           </div>
-        </div>
+        </div> */}
+        <ConnectButton />
       </div>
     </aside>
   );

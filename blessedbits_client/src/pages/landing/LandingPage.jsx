@@ -21,6 +21,7 @@ import Button from "../../components/shared/button/Button";
 import FeatureCard from "../../components/landing/featured-card/FeatureCard";
 import CreatorCard from "../../components/landing/creator-card/CreatorCaed";
 import { useNavigate } from "react-router-dom";
+import { ConnectButton } from "@mysten/dapp-kit";
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -113,9 +114,10 @@ const LandingPage = () => {
           <a href="#">How It Works</a>
           <a href="#">Creators</a>
           <a href="#">About</a>
-          <Button variant="outline" className={styles.navButton}>
+          {/* <Button variant="outline" className={styles.navButton}>
             Early Access
-          </Button>
+          </Button> */}
+          <ConnectButton />
         </nav>
       </header>
 

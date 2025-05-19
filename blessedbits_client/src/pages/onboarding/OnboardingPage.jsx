@@ -1,17 +1,38 @@
-// src/pages/OnboardingPage.jsx
 import { useState } from "react";
 import { FaPrayingHands } from "react-icons/fa";
 import styles from "./OnboardingPage.module.css";
 import Input from "../../components/shared/input/Input";
 import Button from "../../components/shared/button/Button";
+import useCreateContent from "../../hooks/useCreateContent";
+import { useNetworkVariables } from "../../config/networkConfig";
+import { useSignAndExecuteTransaction, useSuiClient } from "@mysten/dapp-kit";
+import { useNavigate } from "react-router-dom";
 
 const OnboardingPage = () => {
   const [username, setUsername] = useState("");
   const [bio, setBio] = useState("");
+  const navigate = useNavigate();
+
+  const { packageId, platformStateId } = useNetworkVariables(
+    "packageId",
+    "platformStateId"
+  );
+  const suiClient = useSuiClient();
+  const { mutate: signAndExecute, isPending } = useSignAndExecuteTransaction();
+
+  const { registerUser } = useCreateContent(
+    packageId,
+    platformStateId,
+    suiClient,
+    signAndExecute
+  );
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Handle form submission
+
+    if (username && bio) {
+      registerUser(username, bio, () => navigate("/app/upload"));
+    }
   };
 
   return (
@@ -40,6 +61,7 @@ const OnboardingPage = () => {
             charCount
             error="Only letters, numbers and underscores allowed"
             hint="This will be your public identity"
+            id="username"
           />
 
           <Input
@@ -53,10 +75,17 @@ const OnboardingPage = () => {
             maxLength={100}
             rows={3}
             error="Please write at least 10 characters"
+            id="bio"
           />
 
-          <Button variant="primary" block icon="arrowRight" type="submit">
-            Continue to BlessedBits
+          <Button
+            variant="primary"
+            block
+            icon="arrowRight"
+            type="submit"
+            disabled={isPending}
+          >
+            {isPending ? "Creating profile..." : "Continue to BlessedBits"}
           </Button>
 
           <p className={styles.termsText}>

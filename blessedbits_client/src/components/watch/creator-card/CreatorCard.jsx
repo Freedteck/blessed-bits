@@ -5,10 +5,12 @@ const CreatorCard = ({ creator, isFollowing, onFollow }) => {
   return (
     <div className={styles.creatorCard}>
       <div className={styles.creatorInfo}>
-        <div className={styles.creatorAvatar}>{creator.initials}</div>
+        <div className={styles.creatorAvatar}>
+          {creator?.username.slice(0, 2)}
+        </div>
         <div>
-          <h3>{creator.name}</h3>
-          <p>{creator.followers}</p>
+          <h3>{creator?.username}</h3>
+          <p>{creator?.followers.length} Followers</p>
         </div>
       </div>
       <Button variant={isFollowing ? "primary" : "outline"} onClick={onFollow}>

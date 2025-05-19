@@ -21,11 +21,12 @@ const VideoPlayer = ({ src, poster, title }) => {
         ref={videoRef}
         controls
         autoPlay
+        src={src}
         poster={poster}
         onClick={togglePlay}
         aria-label={title}
       >
-        <source src={src} type="video/mp4" />
+        {/* <source src={src} type="video/mp4" /> */}
         Your browser does not support the video tag.
       </video>
     </div>
