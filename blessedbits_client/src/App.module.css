@@ -1,17 +1,23 @@
-.container {
+.containerWithSidebar {
   display: grid;
   grid-template-columns: 240px 1fr;
   min-height: 100vh;
 }
 
+.containerFullWidth {
+  display: block;
+  width: 100%;
+  min-height: 100vh;
+}
+
 @media (max-width: 1024px) {
-  .container {
+  .containerWithSidebar {
     grid-template-columns: 200px 1fr;
   }
 }
 
 @media (max-width: 768px) {
-  .container {
+  .containerWithSidebar {
     grid-template-columns: 1fr;
   }
 }

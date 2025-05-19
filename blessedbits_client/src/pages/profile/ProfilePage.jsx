@@ -1,215 +1,227 @@
-import { useState } from "react";
-import {
-  FaShareAlt,
-  FaEdit,
-  FaHeart,
-  FaCoins,
-  FaUpload,
-  FaTrophy,
-  FaGem,
-} from "react-icons/fa";
+import { useEffect, useState } from "react";
+import { FaShareAlt, FaEdit, FaSave, FaCheckCircle } from "react-icons/fa";
 import styles from "./ProfilePage.module.css";
 import VideoCard from "../../components/shared/video-card/VideoCard";
+import { useUserData } from "../../hooks/useUserData";
+import { useNetworkVariables } from "../../config/networkConfig";
+import {
+  useCurrentAccount,
+  useSignAndExecuteTransaction,
+  useSuiClient,
+} from "@mysten/dapp-kit";
+import { useUserBlessBalance } from "../../hooks/useUserBlessBalance";
+import Loading from "../../components/shared/loading/Loading";
+import { formatCoin } from "../../utils/formatCoin";
+import useCreateContent from "../../hooks/useCreateContent";
+import { useBadgeData } from "../../hooks/useBadgeData";
+import BadgeCard from "../../components/badges/badge-card/BadgeCard";
 
 const ProfilePage = () => {
   const [isEditing, setIsEditing] = useState(false);
-  const [bio, setBio] = useState(
-    "Daily devotionals & prayers | Web3 believer | Sharing God's word"
+  const [activeTab, setActiveTab] = useState("content"); // 'content' or 'badges'
+  const [bio, setBio] = useState("");
+
+  const { packageId, platformStateId, badgeCollectionId } = useNetworkVariables(
+    "packageId",
+    "platformStateId",
+    "badgeCollectionId"
   );
 
-  // Mock user data
-  const user = {
-    name: "JohnDoe",
-    initials: "JD",
-    followers: "1.2K",
-    videos: 56,
-    earnings: "4.8K",
-    bannerImage:
-      "https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&h=200&q=80",
+  const account = useCurrentAccount();
+  const suiClient = useSuiClient();
+  const { mutate: signAndExecute } = useSignAndExecuteTransaction();
+
+  const { userProfile, videos, followers, refetch, isPending } = useUserData(
+    platformStateId,
+    account?.address
+  );
+
+  const { updateBio } = useCreateContent(
+    packageId,
+    platformStateId,
+    suiClient,
+    signAndExecute
+  );
+
+  const { userBadges } = useBadgeData(badgeCollectionId, account?.address);
+
+  const { totalBless } = useUserBlessBalance(
+    account?.address,
+    packageId,
+    platformStateId
+  );
+
+  useEffect(() => {
+    if (userProfile) {
+      setBio(userProfile?.bio);
+    }
+  }, [isEditing, userProfile, totalBless]);
+
+  const handleBioChange = () => {
+    const previousBio = userProfile?.bio;
+    if (previousBio !== bio) {
+      updateBio(bio, () => {
+        refetch();
+        setIsEditing(false);
+      });
+    } else {
+      setIsEditing(false);
+    }
   };
 
-  // Mock badges data
-  const badges = [
-    {
-      icon: <FaUpload />,
-      name: "First Upload",
-      earned: true,
-      date: "Jan 15, 2025",
-    },
-    { icon: <FaHeart />, name: "100 Likes", earned: true, date: "Feb 3, 2025" },
-    {
-      icon: <FaCoins />,
-      name: "1K $BLESS",
-      earned: true,
-      date: "Mar 10, 2025",
-    },
-    {
-      icon: <FaTrophy />,
-      name: "Top Creator",
-      earned: false,
-      progress: "25/100 videos",
-    },
-    {
-      icon: <FaGem />,
-      name: "Golden Creator",
-      earned: false,
-      progress: "4.8K/10K",
-    },
-  ];
-
-  // Mock videos data
-  const videos = [
-    {
-      id: 1,
-      thumbnail:
-        "https://images.unsplash.com/photo-1532629345422-7515f3d16bb6?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=180&q=80",
-      duration: "0:52",
-      title: "Evening Prayer Session",
-      likes: 201,
-      earnings: "58",
-    },
-    {
-      id: 2,
-      thumbnail:
-        "https://images.unsplash.com/photo-1497250681960-ef046c08a56e?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=180&q=80",
-      duration: "0:48",
-      title: "God in Nature",
-      likes: 112,
-      earnings: "31",
-    },
-    {
-      id: 3,
-      thumbnail:
-        "https://images.unsplash.com/photo-1545205597-3d9d02c29597?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=180&q=80",
-      duration: "0:58",
-      title: "Morning Meditation",
-      likes: 124,
-      earnings: "32",
-    },
-    {
-      id: 4,
-      thumbnail:
-        "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=180&q=80",
-      duration: "0:55",
-      title: "Bible Study Tips",
-      likes: 78,
-      earnings: "22",
-    },
-    {
-      id: 5,
-      thumbnail:
-        "https://images.unsplash.com/photo-1503764654157-72d97966e920?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=180&q=80",
-      duration: "0:45",
-      title: "Scripture Reflection",
-      likes: 89,
-      earnings: "24",
-    },
-    {
-      id: 6,
-      thumbnail:
-        "https://images.unsplash.com/photo-1518611012118-696072aa579a?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=180&q=80",
-      duration: "1:00",
-      title: "Christian Yoga Flow",
-      likes: 156,
-      earnings: "42",
-    },
-  ];
+  const bannerImage =
+    "https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&h=200&q=80";
 
   return (
     <main className={styles.mainContent}>
-      {/* Profile Banner */}
-      <div className={styles.profileBanner}>
-        <img
-          src={user.bannerImage}
-          alt="Banner"
-          className={styles.bannerImage}
-        />
-        <div className={styles.profileOverlay}>
-          <div className={styles.profileAvatar}>{user.initials}</div>
-          <div className={styles.profileActions}>
-            <button className={styles.actionBtn}>
-              <FaShareAlt /> Share
-            </button>
-            <button
-              className={styles.editBtn}
-              onClick={() => setIsEditing(!isEditing)}
-            >
-              <FaEdit /> {isEditing ? "Cancel" : "Edit Profile"}
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Profile Info */}
-      <div className={styles.profileInfo}>
-        <h1>{user.name}</h1>
-
-        {isEditing ? (
-          <textarea
-            className={styles.bioInput}
-            value={bio}
-            onChange={(e) => setBio(e.target.value)}
-            rows="3"
-          />
-        ) : (
-          <p className={styles.profileBio}>{bio}</p>
-        )}
-
-        <div className={styles.profileStats}>
-          <div className={styles.statItem}>
-            <div className={styles.statValue}>{user.followers}</div>
-            <div className={styles.statLabel}>Followers</div>
-          </div>
-          <div className={styles.statItem}>
-            <div className={styles.statValue}>{user.videos}</div>
-            <div className={styles.statLabel}>Videos</div>
-          </div>
-          <div className={styles.statItem}>
-            <div className={styles.statValue}>{user.earnings} $BLESS</div>
-            <div className={styles.statLabel}>Earnings</div>
-          </div>
-        </div>
-
-        {/* Badges Section */}
-        <div className={styles.badgesSection}>
-          <h3>Top Badges</h3>
-          <div className={styles.badgesScroll}>
-            {badges.slice(0, 4).map((badge, index) => (
-              <div
-                key={index}
-                className={`${styles.badgeIcon} ${
-                  !badge.earned ? styles.locked : ""
-                }`}
-              >
-                {badge.icon}
-                <span>{badge.name}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Videos Section */}
-      <div className={styles.videosSection}>
-        <h2>Your Content</h2>
-        <div className={styles.videoGrid}>
-          {videos.map((video) => (
-            <VideoCard
-              key={video.id}
-              thumbnail={video.thumbnail}
-              duration={video.duration}
-              title={video.title}
-              likes={video.likes}
-              earnings={video.earnings}
-              creatorInitials={user.initials}
-              videoId={video.id}
-              creatorName={user.name}
-              tags={["devotional", "prayer", "worship"]}
-              description="A short description of the video goes here."
+      {isPending ? (
+        <Loading />
+      ) : (
+        <>
+          {/* Profile Banner */}
+          <div className={styles.profileBanner}>
+            <img
+              src={bannerImage}
+              alt="Banner"
+              className={styles.bannerImage}
             />
-          ))}
-        </div>
-      </div>
+            <div className={styles.profileOverlay}>
+              <div className={styles.profileAvatar}>
+                {userProfile?.username.slice(0, 2).toUpperCase()}
+              </div>
+              <div className={styles.profileActions}>
+                <button className={styles.actionBtn}>
+                  <FaShareAlt /> Share
+                </button>
+                <button
+                  className={styles.editBtn}
+                  onClick={() => setIsEditing(!isEditing)}
+                >
+                  <FaEdit /> {isEditing ? "Cancel" : "Edit Profile"}
+                </button>
+                {isEditing && (
+                  <button className={styles.saveBtn} onClick={handleBioChange}>
+                    <FaSave /> Save
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Profile Info */}
+          <div className={styles.profileInfo}>
+            <h1>{userProfile?.username}</h1>
+
+            {isEditing ? (
+              <textarea
+                className={styles.bioInput}
+                value={bio}
+                onChange={(e) => setBio(e.target.value)}
+                rows="3"
+              />
+            ) : (
+              <p className={styles.profileBio}>{bio}</p>
+            )}
+
+            <div className={styles.profileStats}>
+              <div className={styles.statItem}>
+                <div className={styles.statValue}>{followers?.length}</div>
+                <div className={styles.statLabel}>Followers</div>
+              </div>
+              <div className={styles.statItem}>
+                <div className={styles.statValue}>{videos?.length}</div>
+                <div className={styles.statLabel}>Videos</div>
+              </div>
+              <div className={styles.statItem}>
+                <div className={styles.statValue}>
+                  {formatCoin(totalBless)} $BLESS
+                </div>
+                <div className={styles.statLabel}>Earnings</div>
+              </div>
+            </div>
+
+            {/* Tab Navigation */}
+            <div className={styles.tabNavigation}>
+              <button
+                className={`${styles.tabButton} ${
+                  activeTab === "content" ? styles.activeTab : ""
+                }`}
+                onClick={() => setActiveTab("content")}
+              >
+                Your Content ({videos?.length || 0})
+              </button>
+              <button
+                className={`${styles.tabButton} ${
+                  activeTab === "badges" ? styles.activeTab : ""
+                }`}
+                onClick={() => setActiveTab("badges")}
+              >
+                Badges ({userBadges?.length || 0})
+              </button>
+            </div>
+
+            {/* Tab Content */}
+            <div className={styles.tabContent}>
+              {activeTab === "content" ? (
+                <div className={styles.videoGrid}>
+                  {videos.map((video) => (
+                    <VideoCard
+                      key={video.id.id}
+                      thumbnail={video.thumbnail_url}
+                      videoUrl={video.video_url}
+                      title={video.title}
+                      likes={video.likes}
+                      videoId={video.id}
+                      creator={account?.address}
+                      tags={video.tags}
+                      description="A short description of the video goes here."
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className={styles.badgesSection}>
+                  <div className={styles.badgesGrid}>
+                    {userBadges?.map((badge) => (
+                      <BadgeCard
+                        userBadge={badge}
+                        key={badge.id.id}
+                        isEarned={true}
+                      />
+                    ))}
+                  </div>
+
+                  <div className={styles.benefitsCard}>
+                    <h3>Why Earn Badges?</h3>
+                    <div className={styles.benefitsList}>
+                      <div className={styles.benefitItem}>
+                        <FaCheckCircle className={styles.benefitIcon} />
+                        <span>
+                          <strong>Exclusive Perks:</strong> Special profile
+                          frames & early access
+                        </span>
+                      </div>
+                      <div className={styles.benefitItem}>
+                        <FaCheckCircle className={styles.benefitIcon} />
+                        <span>
+                          <strong>Higher Earnings:</strong> +10% $BLESS rewards
+                          for badge holders
+                        </span>
+                      </div>
+                      <div className={styles.benefitItem}>
+                        <FaCheckCircle className={styles.benefitIcon} />
+                        <span>
+                          <strong>NFT Value:</strong> Trade rare badges on Sui
+                          NFT markets
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </>
+      )}
     </main>
   );
 };

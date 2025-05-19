@@ -6,10 +6,10 @@ import WatchPage from "./pages/watch/WatchPage";
 import UploadPage from "./pages/upload/UploadPage";
 import RewardsPage from "./pages/rewards/RewardsPage";
 import ProfilePage from "./pages/profile/ProfilePage";
-import BadgesPage from "./pages/badges/BadgesPage";
 import SettingsPage from "./pages/settings/SettingsPage";
 import ExplorePage from "./pages/explore/ExplorePage";
 import OnboardingPage from "./pages/onboarding/OnboardingPage";
+import ProtectedRoutes from "./components/ProtectedRoute";
 
 export const router = createBrowserRouter([
   {
@@ -21,36 +21,41 @@ export const router = createBrowserRouter([
     Component: App,
     children: [
       {
-        index: true,
-        Component: AppPage,
-      },
-      {
-        path: "explore",
-        Component: ExplorePage,
-      },
-      {
-        path: "video/:videoId",
-        Component: WatchPage,
-      },
-      {
-        path: "upload",
-        Component: UploadPage,
-      },
-      {
-        path: "rewards",
-        Component: RewardsPage,
-      },
-      {
-        path: "profile",
-        Component: ProfilePage,
-      },
-      {
-        path: "badges",
-        Component: BadgesPage,
-      },
-      {
-        path: "settings",
-        Component: SettingsPage,
+        element: <ProtectedRoutes />, // This wraps all protected routes
+        children: [
+          {
+            index: true,
+            Component: AppPage,
+          },
+          {
+            path: "explore",
+            Component: ExplorePage,
+          },
+          {
+            path: "video/:videoId",
+            Component: WatchPage,
+          },
+          {
+            path: "upload",
+            Component: UploadPage,
+          },
+          {
+            path: "rewards",
+            Component: RewardsPage,
+          },
+          {
+            path: "profile",
+            Component: ProfilePage,
+          },
+          // {
+          //   path: "badges",
+          //   Component: BadgesPage,
+          // },
+          {
+            path: "settings",
+            Component: SettingsPage,
+          },
+        ],
       },
       {
         path: "register",

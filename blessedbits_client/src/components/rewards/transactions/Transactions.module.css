@@ -23,12 +23,14 @@
   margin-right: var(--space-md);
 }
 
-.transactionIcon.earn {
+.transactionIcon.earn,
+.transactionIcon.receive {
   background: rgba(16, 185, 129, 0.1);
   color: var(--success);
 }
 
-.transactionIcon.spend {
+.transactionIcon.spend,
+.transactionIcon.send {
   background: rgba(239, 68, 68, 0.1);
   color: var(--error);
 }
@@ -54,11 +56,13 @@
   align-items: center;
 }
 
-.transactionAmount.earn {
+.transactionAmount.earn,
+.transactionAmount.receive {
   color: var(--success);
 }
 
-.transactionAmount.spend {
+.transactionAmount.spend,
+.transactionAmount.send {
   color: var(--error);
 }
 

@@ -1,0 +1,20 @@
+.warning {
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  background-color: #fff3cd;
+  color: #856404;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.link {
+  color: #0056b3;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.link:hover {
+  text-decoration: underline;
+}

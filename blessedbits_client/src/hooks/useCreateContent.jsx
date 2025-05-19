@@ -1,6 +1,7 @@
 import { Transaction } from "@mysten/sui/transactions";
 import useSubmitTransaction from "./useSubmitTransaction";
-import { useGetCoin } from "./useVoteDebug";
+import { useGetCoin } from "./useGetCoin";
+import { useCurrentAccount } from "@mysten/dapp-kit";
 
 const useCreateContent = (
   packageId,
@@ -13,6 +14,7 @@ const useCreateContent = (
     signAndExecute
   );
   const { getBlessedCoin } = useGetCoin(packageId);
+  const account = useCurrentAccount();
 
   const uploadVideo = async (
     videoUrl,
@@ -79,7 +81,7 @@ const useCreateContent = (
     });
   };
 
-  const registerUser = async (username, bio, onSuccess) => {
+  const registerUser = async (username, bio, treasuryId, onSuccess) => {
     const tx = new Transaction();
 
     tx.moveCall({
@@ -92,10 +94,24 @@ const useCreateContent = (
       target: `${packageId}::blessedbits::register_user`,
     });
 
+    // 2. Mint initial $BLESS tokens (1000 tokens)
+    const [coin] = tx.moveCall({
+      arguments: [
+        tx.object(treasuryId),
+        tx.pure.u64(1000), // Initial grant amount
+      ],
+      target: `0x2::coin::mint`,
+      typeArguments: [`${packageId}::blessedbits::BLESSEDBITS`],
+    });
+
+    // Transfer to new user
+    tx.transferObjects([coin], tx.pure.address(account?.address));
+
     return executeTransaction(tx, {
-      successMessage: "User registered successfully!",
-      errorMessage: "Error registering user. Please try again.",
-      loadingMessage: "Registering user...",
+      successMessage:
+        "Registration complete! You received 1000 $BLESS to get started",
+      errorMessage: "Registration failed. Please try again.",
+      loadingMessage: "Creating your account...",
       onSuccess,
     });
   };
@@ -258,6 +274,149 @@ const useCreateContent = (
     });
   };
 
+  /* ====== STAKING FUNCTIONS ====== */
+  const stakeTokens = async (amount, onSuccess) => {
+    const coinObjectId = await getBlessedCoin();
+    const tx = new Transaction();
+
+    const [stakeCoin] = tx.splitCoins(coinObjectId, [tx.pure.u64(amount)]);
+
+    tx.moveCall({
+      arguments: [tx.object(platformStateId), stakeCoin],
+      target: `${packageId}::blessedbits::stake_tokens`,
+    });
+
+    return executeTransaction(tx, {
+      successMessage: "Tokens staked successfully!",
+      errorMessage: "Error staking tokens. Please try again.",
+      loadingMessage: "Staking tokens...",
+      onSuccess,
+    });
+  };
+
+  const unstakeTokens = async (onSuccess) => {
+    const tx = new Transaction();
+
+    tx.moveCall({
+      arguments: [
+        tx.object(platformStateId),
+        tx.object("0x6"), // Clock
+      ],
+      target: `${packageId}::blessedbits::unstake_tokens`,
+    });
+
+    return executeTransaction(tx, {
+      successMessage: "Tokens unstaked successfully!",
+      errorMessage: "Error unstaking tokens. Please try again.",
+      loadingMessage: "Unstaking tokens...",
+      onSuccess,
+    });
+  };
+
+  /* ====== BADGE FUNCTIONS ====== */
+  const awardBadge = async (
+    badgeCollectionId,
+    badgeType,
+    description,
+    recipient,
+    onSuccess
+  ) => {
+    const tx = new Transaction();
+
+    tx.moveCall({
+      arguments: [
+        tx.object(badgeCollectionId),
+        tx.pure.string(badgeType),
+        tx.pure.string(description),
+        tx.pure.address(recipient),
+        tx.object("0x6"), // Clock
+      ],
+      target: `${packageId}::blessedbits::award_badge`,
+    });
+
+    return executeTransaction(tx, {
+      successMessage: "Badge awarded successfully!",
+      errorMessage: "Error awarding badge. Please try again.",
+      loadingMessage: "Awarding badge...",
+      onSuccess,
+    });
+  };
+
+  /* ====== TOKEN PURCHASE ====== */
+  const purchaseTokens = async (
+    treasuryCapId,
+    payment,
+    blessAmount,
+    onSuccess
+  ) => {
+    const tx = new Transaction();
+
+    tx.moveCall({
+      arguments: [
+        tx.object(platformStateId),
+        tx.object(treasuryCapId),
+        tx.object(payment),
+        tx.pure.u64(blessAmount),
+        tx.object("0x6"), // Clock
+      ],
+      target: `${packageId}::blessedbits::purchase_tokens`,
+    });
+
+    return executeTransaction(tx, {
+      successMessage: "Tokens purchased successfully!",
+      errorMessage: "Error purchasing tokens. Please try again.",
+      loadingMessage: "Purchasing tokens...",
+      onSuccess,
+    });
+  };
+
+  /* ====== STAKING REWARDS ====== */
+  const distributeStakerRewards = async (treasuryCapId, onSuccess) => {
+    const tx = new Transaction();
+
+    tx.moveCall({
+      arguments: [
+        tx.object(platformStateId),
+        tx.object(treasuryCapId),
+        tx.object("0x6"), // Clock
+      ],
+      target: `${packageId}::blessedbits::distribute_staker_rewards`,
+    });
+
+    return executeTransaction(tx, {
+      successMessage: "Staking rewards distributed successfully!",
+      errorMessage: "Error distributing rewards. Please try again.",
+      loadingMessage: "Distributing staking rewards...",
+      onSuccess,
+    });
+  };
+
+  /* ====== ACHIEVEMENT CHECK ====== */
+  const checkAchievements = async (
+    badgeCollectionId,
+    userAddress,
+    onSuccess
+  ) => {
+    const tx = new Transaction();
+
+    tx.moveCall({
+      arguments: [
+        tx.object(platformStateId),
+        tx.object(badgeCollectionId),
+        tx.pure.address(userAddress),
+        tx.object("0x6"), // Clock
+      ],
+      target: `${packageId}::blessedbits::check_achievements`,
+    });
+
+    return executeTransaction(tx, {
+      successMessage: "Achievements checked successfully!",
+      errorMessage: "Error checking achievements. Please try again.",
+      loadingMessage: "Checking achievements...",
+      onSuccess,
+    });
+  };
+
   return {
     uploadVideo,
     deleteVideo,
@@ -270,6 +429,12 @@ const useCreateContent = (
     sendReward,
     followUser,
     claimDailyCashback,
+    stakeTokens,
+    unstakeTokens,
+    awardBadge,
+    purchaseTokens,
+    distributeStakerRewards,
+    checkAchievements,
   };
 };
 

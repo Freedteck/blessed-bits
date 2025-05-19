@@ -9,12 +9,7 @@ import {
 } from "react-icons/fa";
 import styles from "./UploadPage.module.css";
 import Button from "../../components/shared/button/Button";
-import {
-  useCurrentAccount,
-  useSignAndExecuteTransaction,
-  useSuiClient,
-} from "@mysten/dapp-kit";
-import { useQueryEvents } from "../../hooks/useQueryEvents";
+import { useSignAndExecuteTransaction, useSuiClient } from "@mysten/dapp-kit";
 import {
   useNetworkVariable,
   useNetworkVariables,
@@ -37,16 +32,7 @@ const UploadPage = () => {
   const { blessBalance } = useContext(WalletContext);
   const navigate = useNavigate();
 
-  const account = useCurrentAccount();
   const packageId = useNetworkVariable("packageId");
-
-  const { data: registeredUserEvents } = useQueryEvents({
-    packageId,
-    eventType: "UserRegistered",
-    filters: {
-      userAddress: account?.address,
-    },
-  });
 
   const { platformStateId, treasuryCapId, badgeCollectionId } =
     useNetworkVariables(
@@ -63,8 +49,6 @@ const UploadPage = () => {
     suiClient,
     signAndExecute
   );
-
-  const isUserRegistered = registeredUserEvents?.length > 0;
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
@@ -146,143 +130,132 @@ const UploadPage = () => {
         </div>
         <button onClick={handleClaim}>{isPending ? "Pending" : "Claim"}</button>
       </header>
-      {isUserRegistered ? (
-        <div className={styles.uploadContainer}>
-          {/* Upload Area */}
-          <div className={styles.uploadArea} onClick={handleUploadAreaClick}>
-            {file ? (
+
+      <div className={styles.uploadContainer}>
+        {/* Upload Area */}
+        <div className={styles.uploadArea} onClick={handleUploadAreaClick}>
+          {file ? (
+            <>
+              <FaCheckCircle className={styles.uploadIcon} />
+              <h3>{file.name}</h3>
+              <p>Ready to upload</p>
+            </>
+          ) : (
+            <>
+              <FaCloudUploadAlt className={styles.uploadIcon} />
+              <h3>Drag & Drop Video</h3>
+              <p>or click to browse files (60s max)</p>
+            </>
+          )}
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            accept="video/*"
+            style={{ display: "none" }}
+          />
+        </div>
+
+        {/* Title Input */}
+        <div className={styles.formGroup}>
+          <label htmlFor="title">Title</label>
+          <input
+            type="text"
+            id="title"
+            className={styles.formControl}
+            placeholder="e.g., Morning Prayer for Peace"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+        </div>
+
+        {/* Description Textarea */}
+        <div className={styles.formGroup}>
+          <label htmlFor="description">Description</label>
+          <textarea
+            id="description"
+            className={styles.formControl}
+            rows="3"
+            placeholder="Share the message behind this video"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          ></textarea>
+        </div>
+
+        {/* Tags Input */}
+        <div className={styles.formGroup}>
+          <label>Tags (AI Suggestions)</label>
+          <div className={styles.tagInput}>
+            {tags.map((tag) => (
+              <div key={tag} className={styles.tag}>
+                #{tag}
+                <button
+                  className={styles.tagRemove}
+                  onClick={() => handleTagRemove(tag)}
+                >
+                  <FaTimes />
+                </button>
+              </div>
+            ))}
+            <input
+              type="text"
+              placeholder="Add tags..."
+              className={styles.tagInputField}
+              value={newTag}
+              onChange={(e) => setNewTag(e.target.value)}
+              onKeyDown={handleTagAdd}
+            />
+          </div>
+        </div>
+
+        {/* Monetization Toggle */}
+        <div className={styles.formGroup}>
+          <label>Monetization</label>
+          <div className={styles.toggleSwitch}>
+            <input
+              type="checkbox"
+              id="monetize"
+              checked={isMonetized}
+              onChange={() => setIsMonetized(!isMonetized)}
+            />
+            <label htmlFor="monetize">Earn $BLESS from votes</label>
+          </div>
+        </div>
+
+        {/* Upload Actions */}
+        <div className={styles.uploadActions}>
+          {/* <Button variant="outline">Save Draft</Button> */}
+          <Button
+            variant="primary"
+            onClick={handleUpload}
+            disabled={!file || isUploading || isPending}
+          >
+            {isUploading || isPending ? (
               <>
-                <FaCheckCircle className={styles.uploadIcon} />
-                <h3>{file.name}</h3>
-                <p>Ready to upload</p>
+                <FaCircle />
+                Uploading...
               </>
             ) : (
               <>
-                <FaCloudUploadAlt className={styles.uploadIcon} />
-                <h3>Drag & Drop Video</h3>
-                <p>or click to browse files (60s max)</p>
+                <FaPlusCircle /> Upload
               </>
             )}
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleFileChange}
-              accept="video/*"
-              style={{ display: "none" }}
-            />
-          </div>
-
-          {/* Title Input */}
-          <div className={styles.formGroup}>
-            <label htmlFor="title">Title</label>
-            <input
-              type="text"
-              id="title"
-              className={styles.formControl}
-              placeholder="e.g., Morning Prayer for Peace"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
-          </div>
-
-          {/* Description Textarea */}
-          <div className={styles.formGroup}>
-            <label htmlFor="description">Description</label>
-            <textarea
-              id="description"
-              className={styles.formControl}
-              rows="3"
-              placeholder="Share the message behind this video"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            ></textarea>
-          </div>
-
-          {/* Tags Input */}
-          <div className={styles.formGroup}>
-            <label>Tags (AI Suggestions)</label>
-            <div className={styles.tagInput}>
-              {tags.map((tag) => (
-                <div key={tag} className={styles.tag}>
-                  #{tag}
-                  <button
-                    className={styles.tagRemove}
-                    onClick={() => handleTagRemove(tag)}
-                  >
-                    <FaTimes />
-                  </button>
-                </div>
-              ))}
-              <input
-                type="text"
-                placeholder="Add tags..."
-                className={styles.tagInputField}
-                value={newTag}
-                onChange={(e) => setNewTag(e.target.value)}
-                onKeyDown={handleTagAdd}
-              />
-            </div>
-          </div>
-
-          {/* Monetization Toggle */}
-          <div className={styles.formGroup}>
-            <label>Monetization</label>
-            <div className={styles.toggleSwitch}>
-              <input
-                type="checkbox"
-                id="monetize"
-                checked={isMonetized}
-                onChange={() => setIsMonetized(!isMonetized)}
-              />
-              <label htmlFor="monetize">Earn $BLESS from votes</label>
-            </div>
-          </div>
-
-          {/* Upload Actions */}
-          <div className={styles.uploadActions}>
-            {/* <Button variant="outline">Save Draft</Button> */}
-            <Button
-              variant="primary"
-              onClick={handleUpload}
-              disabled={!file || isUploading || isPending}
-            >
-              {isUploading || isPending ? (
-                <>
-                  <FaCircle />
-                  Uploading...
-                </>
-              ) : (
-                <>
-                  <FaPlusCircle /> Upload
-                </>
-              )}
-            </Button>
-          </div>
-
-          {/* Upload Progress */}
-          {isUploading && (
-            <div className={styles.uploadProgress}>
-              <div className={styles.progressBar}>
-                <div
-                  className={styles.progressFill}
-                  style={{ width: `${uploadProgress}%` }}
-                ></div>
-              </div>
-              <span>
-                Uploading to decentralized storage... {uploadProgress}%
-              </span>
-            </div>
-          )}
+          </Button>
         </div>
-      ) : (
-        <div className={styles.errorMessage}>
-          <h3>You need to register to upload content.</h3>
-          <p>
-            Please visit the <Link to="/app/register">registration page</Link>{" "}
-            to get started.
-          </p>
-        </div>
-      )}
+
+        {/* Upload Progress */}
+        {isUploading && (
+          <div className={styles.uploadProgress}>
+            <div className={styles.progressBar}>
+              <div
+                className={styles.progressFill}
+                style={{ width: `${uploadProgress}%` }}
+              ></div>
+            </div>
+            <span>Uploading to decentralized storage... {uploadProgress}%</span>
+          </div>
+        )}
+      </div>
     </main>
   );
 };

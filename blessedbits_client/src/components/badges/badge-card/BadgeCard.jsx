@@ -1,14 +1,11 @@
+import * as FaIcons from "react-icons/fa";
+import { formatBadgeDetails } from "../../../utils/formatBadgeDetails";
 import styles from "./BadgeCard.module.css";
 
-const BadgeCard = ({
-  title,
-  description,
-  icon,
-  date,
-  progress,
-  isEarned,
-  isRare,
-}) => {
+const BadgeCard = ({ userBadge, progress, isEarned, isRare }) => {
+  const badge = formatBadgeDetails(userBadge);
+  const IconComponent = FaIcons[`Fa${badge.iconName}`] || FaIcons.FaStar;
+
   return (
     <div
       className={`${styles.badgeCard} ${
@@ -18,11 +15,13 @@ const BadgeCard = ({
       <div
         className={`${styles.badgeIcon} ${!isEarned ? styles.lockedIcon : ""}`}
       >
-        {icon}
+        <IconComponent />
       </div>
-      <h3>{title}</h3>
-      <p>{description}</p>
-      {date && <div className={styles.badgeDate}>Earned: {date}</div>}
+      <h3>{badge.title}</h3>
+      <p>{badge.description}</p>
+      {badge.date && (
+        <div className={styles.badgeDate}>Earned: {badge.date}</div>
+      )}
       {progress && (
         <div className={styles.badgeProgress}>Progress: {progress}</div>
       )}

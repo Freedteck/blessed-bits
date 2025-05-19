@@ -24,6 +24,7 @@ import {
 } from "@mysten/dapp-kit";
 import { useVideoVotingData } from "../../hooks/useVideoVotingData";
 import { useSocialData } from "../../hooks/useSocialData";
+import { formatDate } from "../../utils/formatDate";
 
 const WatchPage = () => {
   const { videoId } = useParams();
@@ -53,7 +54,7 @@ const WatchPage = () => {
   const isFollowingUser = isFollowing(video?.creator);
 
   const { userProfile, videos } = useUserData(platformStateId, video?.creator);
-  const { vote, followUser } = useCreateContent(
+  const { vote, followUser, sendReward } = useCreateContent(
     packageId,
     platformStateId,
     suiClient,
@@ -95,6 +96,19 @@ const WatchPage = () => {
   const handleFollow = () => {
     const followValue = isFollowingUser ? false : true;
     followUser(video?.creator, followValue, badgeCollectionId, () => refetch());
+  };
+
+  const handleTip = (amount) => {
+    sendReward(
+      video?.creator,
+      amount,
+      "Tip sent for great content!",
+      treasuryCapId,
+      () => {
+        setShowTipModal(false);
+        refetch();
+      }
+    );
   };
 
   const handleCommentSubmit = (e) => {
@@ -154,7 +168,7 @@ const WatchPage = () => {
             <h1>{video?.title}</h1>
             <div className={styles.videoMeta}>
               <span className={styles.uploadDate}>
-                Uploaded {video?.created_at}
+                Uploaded {formatDate(video?.created_at)}
               </span>
             </div>
           </div>
@@ -229,10 +243,7 @@ const WatchPage = () => {
         <TipModal
           creatorName={userProfile?.username}
           onClose={() => setShowTipModal(false)}
-          onTipSubmit={(amount) => {
-            console.log(`Tipped ${amount} $BLESS`);
-            setShowTipModal(false);
-          }}
+          onTipSubmit={handleTip}
         />
       )}
     </main>

@@ -19,6 +19,10 @@
   --error: #f56565;
   --success: #48bb78;
 
+  --high-earning: #4caf50; /* Green for high earnings */
+  --medium-earning: #ffc107; /* Amber for medium earnings */
+  --low-earning: #f44336; /* Red for low earnings */
+
   /* Fonts */
   --font-main: "Inter";
   --font-heading: "Space Grotesk";

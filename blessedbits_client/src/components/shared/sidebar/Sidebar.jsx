@@ -18,7 +18,7 @@ const Sidebar = () => {
     { icon: <FaCompass />, label: "Explore", path: "explore", key: "explore" },
     { icon: <FaPlusCircle />, label: "Upload", path: "upload", key: "upload" },
     { icon: <FaCoins />, label: "Rewards", path: "rewards", key: "rewards" },
-    { icon: <FaTrophy />, label: "Badges", path: "badges", key: "badges" },
+    // { icon: <FaTrophy />, label: "Badges", path: "badges", key: "badges" },
     { icon: <FaUser />, label: "Profile", path: "profile", key: "profile" },
     { icon: <FaCog />, label: "Settings", path: "settings", key: "settings" },
   ];

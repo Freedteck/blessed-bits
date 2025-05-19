@@ -8,12 +8,23 @@ import { useCurrentAccount, useSuiClient } from "@mysten/dapp-kit";
 import { getBlessBalance } from "./utils/balance";
 import { useNetworkVariable } from "./config/networkConfig";
 import { WalletContext } from "./components/context/walletContext";
+import { useQueryEvents } from "./hooks/useQueryEvents";
 
 function App() {
   const [balance, setBalance] = useState(0);
   const account = useCurrentAccount();
   const suiClient = useSuiClient();
   const packageId = useNetworkVariable("packageId");
+
+  const { data: registeredUserEvents } = useQueryEvents({
+    packageId,
+    eventType: "UserRegistered",
+    filters: {
+      userAddress: account?.address,
+    },
+  });
+
+  const isUserRegistered = registeredUserEvents?.length > 0;
 
   useEffect(() => {
     const fetchBlessBalance = async () => {
@@ -30,11 +41,19 @@ function App() {
     fetchBlessBalance();
   }, [account, packageId, suiClient]);
   return (
-    <WalletContext.Provider value={{ blessBalance: balance }}>
-      <div className={styles.container}>
+    <WalletContext.Provider
+      value={{ blessBalance: balance, isRegistered: isUserRegistered }}
+    >
+      <div
+        className={
+          isUserRegistered && account
+            ? styles.containerWithSidebar
+            : styles.containerFullWidth
+        }
+      >
         <ScrollToTop />
         <Toaster position="top-center" />
-        <Sidebar />
+        {isUserRegistered && account && <Sidebar />}
         <Outlet />
       </div>
     </WalletContext.Provider>

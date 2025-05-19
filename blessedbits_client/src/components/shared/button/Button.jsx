@@ -23,7 +23,7 @@ const Button = ({
       {...props}
     >
       {children}
-      {icon && <Icon className={styles.icon} />}
+      {icon && <span>{icon}</span>}
     </button>
   );
 };

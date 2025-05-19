@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FaTimes, FaLock, FaLockOpen } from "react-icons/fa";
 import styles from "./StakeModal.module.css";
 import Button from "../../shared/button/Button";
@@ -7,6 +7,12 @@ const StakeModal = ({ action, balance, onClose, onSubmit }) => {
   const [amount, setAmount] = useState("");
   const actionLabel = action === "stake" ? "Stake" : "Unstake";
   const actionIcon = action === "stake" ? <FaLock /> : <FaLockOpen />;
+
+  useEffect(() => {
+    if (action === "unstake") {
+      setAmount(balance);
+    }
+  }, [action, balance]);
 
   const handleSubmit = () => {
     if (!amount || isNaN(amount)) return;
@@ -43,9 +49,15 @@ const StakeModal = ({ action, balance, onClose, onSubmit }) => {
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 placeholder="0.00"
+                disabled={action === "unstake"}
               />
               <span>$BLESS</span>
             </div>
+            {action === "unstake" && (
+              <p className={styles.infoMessage}>
+                You can only unstake your entire balance.
+              </p>
+            )}
             {amount && (amount > balance || amount <= 0) && (
               <p className={styles.errorMessage}>
                 {amount <= 0
