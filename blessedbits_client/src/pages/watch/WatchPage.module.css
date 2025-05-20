@@ -80,6 +80,12 @@
   background: rgba(108, 77, 246, 0.2);
 }
 
+.actionBtn:disabled {
+  background: rgba(108, 77, 246, 0.1);
+  color: var(--text-light);
+  cursor: not-allowed;
+}
+
 .actionBtn svg {
   font-size: 1rem;
 }

@@ -1,4 +1,8 @@
-import { ConnectButton, useCurrentAccount } from "@mysten/dapp-kit";
+import {
+  ConnectButton,
+  useCurrentAccount,
+  useCurrentWallet,
+} from "@mysten/dapp-kit";
 import { Outlet, useNavigate } from "react-router-dom";
 import { useContext } from "react";
 import styles from "./ProtectedRoute.module.css";
@@ -7,10 +11,38 @@ import { WalletContext } from "./context/walletContext";
 
 const ProtectedRoutes = () => {
   const account = useCurrentAccount();
-  const { isRegistered: isUserRegistered } = useContext(WalletContext);
+  const { isRegistered: isUserRegistered, checkingRegistration } =
+    useContext(WalletContext);
+  const { isConnecting } = useCurrentWallet();
+
   const navigate = useNavigate();
 
-  if (!isUserRegistered) {
+  if (isConnecting && !account) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.card}>
+          <h1 className={styles.title}>Connecting...</h1>
+          <p className={styles.message}>
+            Please wait while we connect to your wallet.
+          </p>
+        </div>
+      </div>
+    );
+  }
+  if (!account) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.card}>
+          <h1 className={styles.title}>Wallet Not Connected</h1>
+          <p className={styles.message}>
+            Please connect your wallet to access the app.
+          </p>
+          <ConnectButton />
+        </div>
+      </div>
+    );
+  }
+  if (!checkingRegistration && !isUserRegistered) {
     return (
       <div className={styles.container}>
         <div className={styles.card}>
@@ -34,21 +66,9 @@ const ProtectedRoutes = () => {
         </div>
       </div>
     );
-  } else if (!account) {
-    return (
-      <div className={styles.container}>
-        <div className={styles.card}>
-          <h1 className={styles.title}>Wallet Not Connected</h1>
-          <p className={styles.message}>
-            Please connect your wallet to access the app.
-          </p>
-          <ConnectButton />
-        </div>
-      </div>
-    );
   }
 
-  return <Outlet />;
+  return <>{account && isUserRegistered && <Outlet />}</>;
 };
 
 export default ProtectedRoutes;

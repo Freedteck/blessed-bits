@@ -294,20 +294,24 @@ const SettingsPage = () => {
         <div className={styles.dangerItem}>
           <div>
             <h4>
-              <FaExclamationTriangle /> Deactivate Account
+              <FaExclamationTriangle /> Deactivate Account (Coming soon)
             </h4>
             <p>Temporarily disable your BlessedBits account</p>
           </div>
-          <Button variant="danger">Deactivate</Button>
+          <Button variant="danger" disabled>
+            Deactivate
+          </Button>
         </div>
         <div className={styles.dangerItem}>
           <div>
             <h4>
-              <FaExclamationTriangle /> Delete Account
+              <FaExclamationTriangle /> Delete Account (Coming soon)
             </h4>
             <p>Permanently remove your account and data</p>
           </div>
-          <Button variant="danger">Delete</Button>
+          <Button variant="danger" disabled>
+            Delete
+          </Button>
         </div>
       </div>
 

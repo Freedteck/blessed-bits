@@ -4,14 +4,31 @@ import styles from "./ExplorePage.module.css";
 import VideoCard from "../../components/shared/video-card/VideoCard";
 import { Link } from "react-router-dom";
 import { useVideoData } from "../../hooks/useVideoData";
-import { useNetworkVariable } from "../../config/networkConfig";
+import { useNetworkVariables } from "../../config/networkConfig";
 import Loading from "../../components/shared/loading/Loading";
+import { useCreators } from "../../hooks/useCreators";
+import { formatAddress } from "@mysten/sui/utils";
+import { formatCoin } from "../../utils/formatCoin";
+import {
+  useCurrentAccount,
+  useSignAndExecuteTransaction,
+  useSuiClient,
+} from "@mysten/dapp-kit";
+import useCreateContent from "../../hooks/useCreateContent";
 
 const ExplorePage = () => {
   const [activeTab, setActiveTab] = useState("trending");
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("all");
-  const platformStateId = useNetworkVariable("platformStateId");
+  const { packageId, platformStateId, badgeCollectionId } = useNetworkVariables(
+    "packageId",
+    "platformStateId",
+    "badgeCollectionId"
+  );
+  const account = useCurrentAccount();
+
+  const suiClient = useSuiClient();
+  const { mutate: signAndExecute } = useSignAndExecuteTransaction();
 
   const categories = [
     { id: "All", name: "All" },
@@ -24,33 +41,27 @@ const ExplorePage = () => {
   ];
 
   const { allVideos, isPending } = useVideoData(platformStateId);
+  const {
+    creators,
+    isPending: creatorsPending,
+    refetch,
+  } = useCreators(platformStateId);
 
-  const recommendedCreators = [
-    {
-      id: "mg",
-      initials: "MG",
-      name: "MindfulGuide",
-      description: "Daily mindfulness tips",
-      followers: "1.2K",
-      isFollowing: false,
-    },
-    {
-      id: "sl",
-      initials: "SL",
-      name: "SpiritualLife",
-      description: "Meditation guidance",
-      followers: "2.4K",
-      isFollowing: true,
-    },
-    {
-      id: "pw",
-      initials: "PW",
-      name: "PrayerWarrior",
-      description: "Daily prayer sessions",
-      followers: "1.7K",
-      isFollowing: false,
-    },
-  ];
+  const { followUser } = useCreateContent(
+    packageId,
+    platformStateId,
+    suiClient,
+    signAndExecute
+  );
+
+  const recommendedCreators = creators
+    .filter(
+      (creator) => creator.videos_uploaded > 0 && creator.followers.length >= 0
+    )
+    .slice(0, 4);
+
+  const isFollowingUser = (creator) =>
+    creator.followers.includes(account?.address);
 
   const filteredVideos = allVideos
     .filter((video) => {
@@ -89,6 +100,13 @@ const ExplorePage = () => {
         .slice(0, 4),
     }))
     .filter((category) => category.videos.length > 0);
+
+  const handleFollow = async (creator) => {
+    const followValue = isFollowingUser(creator) ? false : true;
+    await followUser(creator.address, followValue, badgeCollectionId, () =>
+      refetch()
+    );
+  };
 
   return (
     <main className={styles.mainContent}>
@@ -202,33 +220,39 @@ const ExplorePage = () => {
           </section>
         </>
       )}
-
-      <section className={styles.creatorsSection}>
-        <h2>Recommended Creators</h2>
-        <div className={styles.creatorsGrid}>
-          {recommendedCreators.map((creator) => (
-            <div key={creator.id} className={styles.creatorCard}>
-              <div className={styles.creatorInfo}>
-                <div className={styles.creatorAvatar}>{creator.initials}</div>
-                <div>
-                  <h3>{creator.name}</h3>
-                  <p>{creator.description}</p>
-                  <span className={styles.followers}>
-                    {creator.followers} followers
-                  </span>
+      {creatorsPending ? (
+        <Loading />
+      ) : (
+        <section className={styles.creatorsSection}>
+          <h2>Recommended Creators</h2>
+          <div className={styles.creatorsGrid}>
+            {recommendedCreators.map((creator) => (
+              <div key={creator.id.id} className={styles.creatorCard}>
+                <div className={styles.creatorInfo}>
+                  <div className={styles.creatorAvatar}>
+                    {creator?.username.slice(0, 2)}
+                  </div>
+                  <div>
+                    <h3>{creator.username}</h3>
+                    <p>{formatAddress(creator.address)}</p>
+                    <span className={styles.followers}>
+                      {formatCoin(creator.followers.length)} followers
+                    </span>
+                  </div>
                 </div>
+                <button
+                  className={`${styles.followButton} ${
+                    isFollowingUser(creator) ? styles.following : ""
+                  }`}
+                  onClick={() => handleFollow(creator)}
+                >
+                  {isFollowingUser(creator) ? "Following" : "Follow"}
+                </button>
               </div>
-              <button
-                className={`${styles.followButton} ${
-                  creator.isFollowing ? styles.following : ""
-                }`}
-              >
-                {creator.isFollowing ? "Following" : "Follow"}
-              </button>
-            </div>
-          ))}
-        </div>
-      </section>
+            ))}
+          </div>
+        </section>
+      )}
     </main>
   );
 };

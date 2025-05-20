@@ -2,22 +2,20 @@ import { FaHeart, FaCoins } from "react-icons/fa";
 import styles from "./RelatedVideos.module.css";
 import VideoCard from "../../shared/video-card/VideoCard";
 import { Link } from "react-router-dom";
+import { formatCoin } from "../../../utils/formatCoin";
+import { useCurrentAccount } from "@mysten/dapp-kit";
 
-const RelatedVideos = ({ relatedVideos, creator }) => {
-  const suggestedCreators = [
-    {
-      id: "mg",
-      initials: "MG",
-      name: "MindfulGuide",
-      description: "Daily mindfulness tips",
-    },
-    {
-      id: "sl",
-      initials: "SL",
-      name: "SpiritualLife",
-      description: "Meditation guidance",
-    },
-  ];
+const RelatedVideos = ({
+  relatedVideos,
+  creator,
+  suggestedCreators,
+  handleFollow,
+}) => {
+  const account = useCurrentAccount();
+  const isFollowingUser = (creator) =>
+    creator.followers.includes(account?.address);
+
+  console.log(suggestedCreators);
 
   return (
     <div className={styles.relatedVideosColumn}>
@@ -43,14 +41,25 @@ const RelatedVideos = ({ relatedVideos, creator }) => {
       <div className={styles.suggestedCreators}>
         <h3>Suggested Creators</h3>
         <div className={styles.creatorList}>
-          {suggestedCreators.map((creator) => (
-            <div key={creator.id} className={styles.creatorItem}>
-              <div className={styles.creatorAvatar}>{creator.initials}</div>
-              <div>
-                <h4>{creator.name}</h4>
-                <p>{creator.description}</p>
+          {suggestedCreators?.map((creator) => (
+            <div key={creator.id.id} className={styles.creatorItem}>
+              <div className={styles.creatorAvatar}>
+                {creator.username.slice(0, 2)}
               </div>
-              <button className={styles.followButton}>Follow</button>
+              <div>
+                <h4>{creator.username}</h4>
+                <p>{formatCoin(creator.followers.length)} Followers</p>
+              </div>
+              <button
+                className={
+                  isFollowingUser(creator)
+                    ? styles.followingButton
+                    : styles.followButton
+                }
+                onClick={() => handleFollow(creator.address)}
+              >
+                {isFollowingUser(creator) ? "Following" : "Follow"}
+              </button>
             </div>
           ))}
         </div>

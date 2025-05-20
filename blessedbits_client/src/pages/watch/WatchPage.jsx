@@ -25,6 +25,7 @@ import {
 import { useVideoVotingData } from "../../hooks/useVideoVotingData";
 import { useSocialData } from "../../hooks/useSocialData";
 import { formatDate } from "../../utils/formatDate";
+import { useCreators } from "../../hooks/useCreators";
 
 const WatchPage = () => {
   const { videoId } = useParams();
@@ -32,6 +33,7 @@ const WatchPage = () => {
   const [showTipModal, setShowTipModal] = useState(false);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
+  const [suggestedCreators, setSuggestedCreators] = useState([]);
   const { packageId, platformStateId, treasuryCapId, badgeCollectionId } =
     useNetworkVariables(
       "packageId",
@@ -60,6 +62,20 @@ const WatchPage = () => {
     suiClient,
     signAndExecute
   );
+
+  const {
+    getSuggestedCreators,
+    isPending: creatorsPending,
+    refetch: refetchSuggestedCreators,
+  } = useCreators(platformStateId);
+
+  useEffect(() => {
+    if (video && !creatorsPending) {
+      setSuggestedCreators(getSuggestedCreators(video));
+    }
+  }, [video, creatorsPending, getSuggestedCreators]);
+
+  const isOwner = video?.creator === account?.address;
 
   // Mock comments data
   useEffect(() => {
@@ -96,6 +112,13 @@ const WatchPage = () => {
   const handleFollow = () => {
     const followValue = isFollowingUser ? false : true;
     followUser(video?.creator, followValue, badgeCollectionId, () => refetch());
+  };
+
+  const handleFollowSuggested = (creatorAddress) => {
+    const followValue = isFollowing(creatorAddress) ? false : true;
+    followUser(creatorAddress, followValue, badgeCollectionId, () =>
+      refetchSuggestedCreators()
+    );
   };
 
   const handleTip = (amount) => {
@@ -179,6 +202,7 @@ const WatchPage = () => {
               className={`${styles.actionBtn} ${styles.likeBtn} ${
                 userVote ? styles.active : ""
               }`}
+              disabled={isOwner}
               onClick={handleLike}
             >
               <FaHeart />
@@ -186,6 +210,7 @@ const WatchPage = () => {
             </button>
             <button
               className={styles.actionBtn}
+              disabled={isOwner}
               onClick={() => setShowTipModal(true)}
             >
               <FaCoins />
@@ -237,6 +262,8 @@ const WatchPage = () => {
           .filter((vid) => vid.id.id !== videoId)
           .slice(0, 5)}
         creator={userProfile?.username}
+        suggestedCreators={suggestedCreators}
+        handleFollow={handleFollowSuggested}
       />
       {/* Tip Modal */}
       {showTipModal && (

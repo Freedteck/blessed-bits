@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { FaLock, FaLockOpen, FaWallet } from "react-icons/fa";
+import { useEffect, useState } from "react";
+import { FaGift, FaLock, FaLockOpen, FaWallet } from "react-icons/fa";
 import styles from "./RewardsPage.module.css";
 import Transactions from "../../components/rewards/transactions/Transactions";
 import StakeModal from "../../components/rewards/stake-modal/StakeModal";
@@ -13,20 +13,25 @@ import {
 import { useWeeklyEarnings } from "../../hooks/useWeeklyEarnings";
 import { useUserTransactions } from "../../hooks/useUserTransactions";
 import useCreateContent from "../../hooks/useCreateContent";
+import { useUserData } from "../../hooks/useUserData";
 
 const RewardsPage = () => {
   const [showStakeModal, setShowStakeModal] = useState(false);
   const [action, setAction] = useState("stake");
   const account = useCurrentAccount();
+  const [lastCashbackClaim, setLastCashbackClaim] = useState(0);
+  const [canClaimCashback, setCanClaimCashback] = useState(false);
+  const [timeUntilNextClaim, setTimeUntilNextClaim] = useState("");
 
-  const { packageId, platformStateId } = useNetworkVariables(
+  const { packageId, platformStateId, treasuryCapId } = useNetworkVariables(
     "packageId",
-    "platformStateId"
+    "platformStateId",
+    "treasuryCapId"
   );
   const suiClient = useSuiClient();
   const { mutate: signAndExecute } = useSignAndExecuteTransaction();
 
-  const { stakeTokens, unstakeTokens } = useCreateContent(
+  const { stakeTokens, unstakeTokens, claimDailyCashback } = useCreateContent(
     packageId,
     platformStateId,
     suiClient,
@@ -41,6 +46,10 @@ const RewardsPage = () => {
     votingPower,
     refetch,
   } = useUserBlessBalance(account?.address, packageId, platformStateId);
+  const { userProfile, refetch: refetchUserData } = useUserData(
+    platformStateId,
+    account?.address
+  );
 
   const weeklyEarnings = useWeeklyEarnings(account?.address);
   const {
@@ -68,6 +77,74 @@ const RewardsPage = () => {
         refetchTxn();
       });
     }
+  };
+
+  const formatTimeUntilNextClaim = (timeLeft) => {
+    if (timeLeft <= 0) return "Now!";
+
+    const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+    const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+
+    // Only show hours if more than 0
+    if (hours > 0) {
+      return `${hours}h ${minutes}m`;
+    }
+    return `${minutes}m`;
+  };
+
+  useEffect(() => {
+    if (account?.address) {
+      const now = Date.now();
+      const twentyFourHours = 24 * 60 * 60 * 1000;
+      console.log(userProfile);
+
+      const lastClaim = +userProfile?.last_cashback_claim;
+
+      setLastCashbackClaim(lastClaim);
+      setCanClaimCashback(now - lastClaim >= twentyFourHours);
+    }
+  }, [account, userProfile]);
+
+  useEffect(() => {
+    if (!canClaimCashback && lastCashbackClaim > 0) {
+      const interval = setInterval(() => {
+        const now = Date.now();
+        const nextClaimTime = lastCashbackClaim + 24 * 60 * 60 * 1000;
+        const timeLeft = nextClaimTime - now;
+
+        if (timeLeft <= 0) {
+          setCanClaimCashback(true);
+          clearInterval(interval);
+          setTimeUntilNextClaim("Now!");
+        } else {
+          setTimeUntilNextClaim(formatTimeUntilNextClaim(timeLeft));
+        }
+      }, 60000); // Update every minute
+
+      // Initial calculation
+      const initialTimeLeft =
+        lastCashbackClaim + 24 * 60 * 60 * 1000 - Date.now();
+      setTimeUntilNextClaim(formatTimeUntilNextClaim(initialTimeLeft));
+
+      return () => clearInterval(interval);
+    }
+  }, [canClaimCashback, lastCashbackClaim]);
+
+  const calculateProgress = () => {
+    if (lastCashbackClaim <= 0) return 0;
+    const elapsed = Date.now() - lastCashbackClaim;
+    const progress = (elapsed / (24 * 60 * 60 * 1000)) * 100;
+    return Math.min(100, Math.max(0, progress));
+  };
+
+  const handleClaimCashback = () => {
+    claimDailyCashback(treasuryCapId, () => {
+      setLastCashbackClaim(Date.now());
+      setCanClaimCashback(false);
+      refetch(); // Refresh balance
+      refetchTxn(); // Refresh transactions
+      refetchUserData(); // Refresh user data
+    });
   };
 
   return (
@@ -113,6 +190,37 @@ const RewardsPage = () => {
             </div>
             <span>Voting Power</span>
           </div>
+        </div>
+
+        {/* Add Cashback Section Here */}
+        <div className={styles.cashbackSection}>
+          <button
+            className={`${styles.cashbackButton} ${
+              !canClaimCashback ? styles.disabled : ""
+            }`}
+            onClick={handleClaimCashback}
+            disabled={!canClaimCashback}
+          >
+            <FaGift /> Claim Daily Cashback
+          </button>
+
+          {!canClaimCashback && (
+            <div className={styles.cashbackStatus}>
+              {lastCashbackClaim > 0 ? (
+                <>
+                  <span>Next claim: {timeUntilNextClaim}</span>
+                  <div className={styles.cashbackProgress}>
+                    <div
+                      className={styles.progressBar}
+                      style={{ width: `${calculateProgress()}%` }}
+                    />
+                  </div>
+                </>
+              ) : (
+                <span>Claim your first cashback!</span>
+              )}
+            </div>
+          )}
         </div>
       </div>
 

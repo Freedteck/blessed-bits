@@ -16,7 +16,7 @@ function App() {
   const suiClient = useSuiClient();
   const packageId = useNetworkVariable("packageId");
 
-  const { data: registeredUserEvents } = useQueryEvents({
+  const { data: registeredUserEvents, isPending } = useQueryEvents({
     packageId,
     eventType: "UserRegistered",
     filters: {
@@ -24,7 +24,7 @@ function App() {
     },
   });
 
-  const isUserRegistered = registeredUserEvents?.length > 0;
+  const isUserRegistered = !isPending && registeredUserEvents?.length > 0;
 
   useEffect(() => {
     const fetchBlessBalance = async () => {
@@ -42,7 +42,11 @@ function App() {
   }, [account, packageId, suiClient]);
   return (
     <WalletContext.Provider
-      value={{ blessBalance: balance, isRegistered: isUserRegistered }}
+      value={{
+        blessBalance: balance,
+        isRegistered: isUserRegistered,
+        checkingRegistration: isPending,
+      }}
     >
       <div
         className={
