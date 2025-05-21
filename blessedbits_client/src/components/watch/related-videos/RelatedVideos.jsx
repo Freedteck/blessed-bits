@@ -15,8 +15,6 @@ const RelatedVideos = ({
   const isFollowingUser = (creator) =>
     creator.followers.includes(account?.address);
 
-  console.log(suggestedCreators);
-
   return (
     <div className={styles.relatedVideosColumn}>
       <h3>More from {creator}</h3>

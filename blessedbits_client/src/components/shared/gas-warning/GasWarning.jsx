@@ -1,7 +1,8 @@
-import { useSuiClientQuery } from "@mysten/dapp-kit";
+import { useSuiClientContext, useSuiClientQuery } from "@mysten/dapp-kit";
 import styles from "./GasWarning.module.css";
 
 const GasWarning = ({ userAddress, minimumBalance = 0.1 }) => {
+  const { network } = useSuiClientContext();
   const { data: balance } = useSuiClientQuery(
     "getBalance",
     { owner: userAddress },
@@ -18,7 +19,7 @@ const GasWarning = ({ userAddress, minimumBalance = 0.1 }) => {
     <div className={styles.warning}>
       <p>You need at least {minimumBalance} SUI for transaction fees.</p>
       <a
-        href={`https://faucet.sui.io/?network=devnet&address=${userAddress}`}
+        href={`https://faucet.sui.io/?network=${network}&address=${userAddress}`}
         target="_blank"
         rel="noopener noreferrer"
         className={styles.link}

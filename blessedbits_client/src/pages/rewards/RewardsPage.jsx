@@ -96,7 +96,6 @@ const RewardsPage = () => {
     if (account?.address) {
       const now = Date.now();
       const twentyFourHours = 24 * 60 * 60 * 1000;
-      console.log(userProfile);
 
       const lastClaim = +userProfile?.last_cashback_claim;
 

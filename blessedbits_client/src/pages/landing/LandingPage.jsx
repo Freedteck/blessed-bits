@@ -21,10 +21,19 @@ import Button from "../../components/shared/button/Button";
 import FeatureCard from "../../components/landing/featured-card/FeatureCard";
 import CreatorCard from "../../components/landing/creator-card/CreatorCaed";
 import { useNavigate } from "react-router-dom";
-import { ConnectButton } from "@mysten/dapp-kit";
+import AuthModal from "../../components/shared/modal/AuthModal";
+import { useState } from "react";
+import { ConnectButton, useCurrentWallet } from "@mysten/dapp-kit";
 
 const LandingPage = () => {
   const navigate = useNavigate();
+  const [isOpen, setIsOpen] = useState(false);
+  const { isConnected } = useCurrentWallet();
+
+  const handleClose = () => {
+    setIsOpen(false);
+    // window.location.reload();
+  };
   const features = [
     {
       icon: <FaVideo />,
@@ -114,10 +123,17 @@ const LandingPage = () => {
           <a href="#">How It Works</a>
           <a href="#">Creators</a>
           <a href="#">About</a>
-          {/* <Button variant="outline" className={styles.navButton}>
-            Early Access
-          </Button> */}
-          <ConnectButton />
+          {isConnected ? (
+            <ConnectButton />
+          ) : (
+            <Button
+              variant="outline"
+              className={styles.navButton}
+              onClick={() => setIsOpen(true)}
+            >
+              Connect Account
+            </Button>
+          )}
         </nav>
       </header>
 
@@ -265,6 +281,7 @@ const LandingPage = () => {
           </div>
         </div>
       </footer>
+      {isOpen && <AuthModal onClose={handleClose} />}
     </div>
   );
 };
