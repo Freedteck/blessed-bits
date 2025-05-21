@@ -22,7 +22,7 @@ export const useWeeklyEarnings = (userAddress) => {
     recentEarnings.forEach((tx) => {
       const date = new Date(tx.timestamp);
       const dayOfWeek = date.getDay(); // 0 (Sunday) to 6 (Saturday)
-      earningsByDay[dayOfWeek] += tx.amount;
+      earningsByDay[dayOfWeek] += +tx.amount;
     });
 
     // Normalize values for the chart (0-100 scale)

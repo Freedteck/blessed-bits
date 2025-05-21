@@ -7,7 +7,9 @@ const useSubmitTransaction = (suiClient, signAndExecute) => {
     tx,
     {
       onSuccess = () => {},
-      onError = () => {},
+      onError = (e) => {
+        console.error("Transaction error:", e);
+      },
       successMessage = "Transaction successful!",
       errorMessage = "Transaction failed. Please try again.",
       loadingMessage = "Processing transaction...",

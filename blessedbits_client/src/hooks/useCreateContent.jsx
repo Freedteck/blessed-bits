@@ -94,11 +94,11 @@ const useCreateContent = (
       target: `${packageId}::blessedbits::register_user`,
     });
 
-    // 2. Mint initial $BLESS tokens (1000 tokens)
+    // 2. Mint initial $BLESS tokens (100 tokens)
     const [coin] = tx.moveCall({
       arguments: [
         tx.object(treasuryId),
-        tx.pure.u64(1000), // Initial grant amount
+        tx.pure.u64(100), // Initial grant amount
       ],
       target: `0x2::coin::mint`,
       typeArguments: [`${packageId}::blessedbits::BLESSEDBITS`],
@@ -109,7 +109,7 @@ const useCreateContent = (
 
     return executeTransaction(tx, {
       successMessage:
-        "Registration complete! You received 1000 $BLESS to get started",
+        "Registration complete! You received 100 $BLESS to get started",
       errorMessage: "Registration failed. Please try again.",
       loadingMessage: "Creating your account...",
       onSuccess,

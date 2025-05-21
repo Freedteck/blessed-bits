@@ -94,7 +94,7 @@ const OnboardingPage = () => {
     setMessage(null);
 
     try {
-      await registerUser(formData.username, formData.bio, treasuryCapId, () => {
+      registerUser(formData.username, formData.bio, treasuryCapId, () => {
         setMessage({
           text: "Registration complete! You received 1000 $BLESS to get started",
           isError: false,
@@ -184,7 +184,7 @@ const OnboardingPage = () => {
           </div>
 
           <div className={styles.note}>
-            <strong>Welcome gift:</strong> Receive 1000 $BLESS tokens when you
+            <strong>Welcome gift:</strong> Receive 100 $BLESS tokens when you
             register!
           </div>
 
