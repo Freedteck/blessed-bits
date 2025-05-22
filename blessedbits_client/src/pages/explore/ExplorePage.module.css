@@ -1,5 +1,5 @@
 .mainContent {
-  padding: var(--space-xl);
+  padding: var(--space-md) var(--space-lg);
   background-color: var(--light);
 }
 
@@ -62,7 +62,6 @@
   display: flex;
   gap: var(--space-sm);
   margin-bottom: var(--space-xl);
-  flex-wrap: wrap;
 }
 
 .category {
@@ -239,6 +238,12 @@
     overflow-x: auto;
     padding-bottom: var(--space-sm);
     white-space: nowrap;
+    width: 85vw;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding: var(--space-sm);
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+    scrollbar-width: none; /* Hide scrollbar for Firefox */
   }
 
   .categoryGrid {

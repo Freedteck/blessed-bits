@@ -1,5 +1,5 @@
 .mainContent {
-  padding: var(--space-md) var(--space-xl);
+  padding: var(--space-md) var(--space-lg);
   background-color: var(--light);
 }
 
@@ -95,14 +95,14 @@
 }
 
 .profileInfo h1 {
-  font-size: 2rem;
+  font-size: clamp(1.5rem, 5vw, 2rem);
   margin-bottom: var(--space-sm);
 }
 
 .profileBio {
   color: var(--text-light);
   margin: var(--space-md) 0 var(--space-xl);
-  font-size: 1.1rem;
+  font-size: clamp(0.9rem, 3vw, 1.1rem);
   line-height: 1.6;
 }
 
@@ -128,13 +128,13 @@
 }
 
 .statValue {
-  font-size: 1.5rem;
+  font-size: clamp(1rem, 4vw, 1.5rem);
   font-weight: 700;
   color: var(--primary);
 }
 
 .statLabel {
-  font-size: 0.875rem;
+  font-size: clamp(0.75rem, 2.5vw, 0.875rem);
   color: var(--text-light);
 }
 
@@ -175,7 +175,7 @@
 }
 
 .badgeIcon span {
-  font-size: 0.7rem;
+  font-size: clamp(0.6rem, 2vw, 0.7rem);
   line-height: 1.2;
 }
 
@@ -218,6 +218,7 @@
   color: var(--text-light);
   cursor: pointer;
   transition: all 0.2s ease;
+  font-size: clamp(0.8rem, 2.5vw, 1rem);
 }
 
 .tabButton:hover {
@@ -249,20 +250,25 @@
 }
 
 @media (max-width: 768px) {
+  .mainContent {
+    padding-bottom: 80px;
+  }
+
   .profileBanner {
     height: 180px;
   }
 
   .profileOverlay {
-    flex-direction: column;
-    align-items: flex-start;
-    bottom: -80px;
+    /* flex-direction: column; */
+    align-items: flex-end;
+    bottom: 0;
   }
 
   .profileAvatar {
-    width: 100px;
-    height: 100px;
+    width: 80px;
+    height: 80px;
     margin-bottom: var(--space-md);
+    font-size: 2rem;
   }
 
   .profileActions {
@@ -270,12 +276,7 @@
   }
 
   .profileStats {
-    flex-wrap: wrap;
     gap: var(--space-md);
-  }
-
-  .statItem {
-    flex: 1 0 40%;
   }
 
   .videoGrid {
@@ -297,7 +298,7 @@
 
 .benefitsCard h3 {
   margin-bottom: var(--space-lg);
-  font-size: 1.3rem;
+  font-size: clamp(1rem, 3.5vw, 1.3rem);
 }
 
 .benefitsList {
@@ -311,6 +312,10 @@
   margin-bottom: var(--space-md);
 }
 
+.benefitItem span {
+  font-size: clamp(0.8rem, 2.5vw, 1rem);
+}
+
 .benefitIcon {
   color: var(--primary);
   margin-top: 0.2rem;
@@ -318,6 +323,10 @@
 }
 
 @media (max-width: 480px) {
+  .actionBtn span {
+    display: none;
+  }
+
   .videoGrid {
     grid-template-columns: 1fr;
   }
@@ -327,11 +336,7 @@
   }
 
   .profileStats {
-    flex-direction: column;
+    /* flex-direction: column; */
     gap: var(--space-md);
-  }
-
-  .statItem {
-    flex: 1 0 100%;
   }
 }

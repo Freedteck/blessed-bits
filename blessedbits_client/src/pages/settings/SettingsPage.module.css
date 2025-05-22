@@ -1,5 +1,5 @@
 .mainContent {
-  padding: var(--space-xl);
+  padding: var(--space-md) var(--space-lg);
   background-color: var(--light);
 }
 
@@ -390,6 +390,14 @@ input:checked + .slider:before {
   .settingsTabs {
     overflow-x: auto;
     padding-bottom: var(--space-sm);
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox */
+    width: 85vw;
+  }
+
+  .settingsTabs::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
   }
 
   .tab {

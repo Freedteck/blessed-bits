@@ -91,17 +91,18 @@ const ProfilePage = () => {
               </div>
               <div className={styles.profileActions}>
                 <button className={styles.actionBtn}>
-                  <FaShareAlt /> Share
+                  <FaShareAlt /> <span>Share</span>
                 </button>
                 <button
                   className={styles.editBtn}
                   onClick={() => setIsEditing(!isEditing)}
                 >
-                  <FaEdit /> {isEditing ? "Cancel" : "Edit Profile"}
+                  <FaEdit />{" "}
+                  <span>{isEditing ? "Cancel" : "Edit Profile"}</span>
                 </button>
                 {isEditing && (
                   <button className={styles.saveBtn} onClick={handleBioChange}>
-                    <FaSave /> Save
+                    <FaSave /> <span>Save</span>
                   </button>
                 )}
               </div>

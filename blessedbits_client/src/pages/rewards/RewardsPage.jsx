@@ -200,7 +200,7 @@ const RewardsPage = () => {
             onClick={handleClaimCashback}
             disabled={!canClaimCashback}
           >
-            <FaGift /> Claim Daily Cashback
+            <FaGift /> Claim Cashback
           </button>
 
           {!canClaimCashback && (
