@@ -31,6 +31,7 @@
   border-radius: var(--radius-lg);
   padding: var(--space-md);
   box-shadow: var(--shadow-sm);
+  width: 100%;
 }
 
 .videoHeader h1 {
@@ -172,5 +173,9 @@
 
   .earningsCard {
     grid-template-columns: 1fr;
+  }
+
+  .videoPlayerWrapper {
+    padding: var(--space-sm);
   }
 }
