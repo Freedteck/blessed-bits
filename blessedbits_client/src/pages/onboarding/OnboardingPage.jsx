@@ -14,6 +14,7 @@ import Button from "../../components/shared/button/Button";
 import Loading from "../../components/shared/loading/Loading";
 
 const OnboardingPage = () => {
+  const BIO_MAX_LENGTH = 160;
   const [formData, setFormData] = useState({
     username: "",
     bio: "",
@@ -53,6 +54,8 @@ const OnboardingPage = () => {
   const validateBio = (value) => {
     if (!value) return "Bio is required";
     if (value.length < 10) return "Must be at least 10 characters";
+    if (value.length > BIO_MAX_LENGTH)
+      return `Must be less than ${BIO_MAX_LENGTH} characters`;
     return null;
   };
 
@@ -167,6 +170,8 @@ const OnboardingPage = () => {
             id="bio"
             disabled={isProcessing}
             rows={3}
+            hint={`${formData.bio.length}/${BIO_MAX_LENGTH} characters`}
+            maxLength={BIO_MAX_LENGTH}
           />
 
           <div className={styles.btn}>

@@ -28,6 +28,8 @@ import { formatAddress } from "@mysten/sui/utils";
 import { formatSuiBalance } from "../../utils/balance";
 
 const ProfilePage = () => {
+  const BIO_MAX_LENGTH = 160;
+  const [bioError, setBioError] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState("content"); // 'content' or 'badges'
   const [bio, setBio] = useState("");
@@ -78,15 +80,33 @@ const ProfilePage = () => {
   }, [isEditing, userProfile, totalBless]);
 
   const handleBioChange = () => {
+    const error = validateBio(bio);
+    setBioError(error);
+
+    if (error) {
+      toast.error(error);
+      return;
+    }
+
     const previousBio = userProfile?.bio;
     if (previousBio !== bio) {
       updateBio(bio, () => {
         refetch();
         setIsEditing(false);
+        setBioError(null);
       });
     } else {
       setIsEditing(false);
+      setBioError(null);
     }
+  };
+
+  const validateBio = (value) => {
+    if (!value) return "Bio is required";
+    if (value.length < 10) return "Must be at least 10 characters";
+    if (value.length > BIO_MAX_LENGTH)
+      return `Must be less than ${BIO_MAX_LENGTH} characters`;
+    return null;
   };
 
   const copyAddress = () => {
@@ -149,12 +169,29 @@ const ProfilePage = () => {
             <h1>{userProfile?.username}</h1>
 
             {isEditing ? (
-              <textarea
-                className={styles.bioInput}
-                value={bio}
-                onChange={(e) => setBio(e.target.value)}
-                rows="3"
-              />
+              <div className={styles.bioInputContainer}>
+                <textarea
+                  className={`${styles.bioInput} ${
+                    bioError ? styles.error : ""
+                  }`}
+                  value={bio}
+                  onChange={(e) => {
+                    setBio(e.target.value);
+                    // Validate on change but don't show error until blur
+                  }}
+                  onBlur={() => setBioError(validateBio(bio))}
+                  rows="3"
+                  maxLength={BIO_MAX_LENGTH}
+                />
+                <div className={styles.bioMeta}>
+                  <div className={styles.characterCounter}>
+                    {bio.length}/{BIO_MAX_LENGTH}
+                  </div>
+                  {bioError && (
+                    <div className={styles.bioError}>{bioError}</div>
+                  )}
+                </div>
+              </div>
             ) : (
               <p className={styles.profileBio}>{bio}</p>
             )}

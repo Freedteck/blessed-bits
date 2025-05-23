@@ -116,6 +116,43 @@
   resize: vertical;
   min-height: 100px;
 }
+
+.bioInputContainer {
+  margin: var(--space-md) 0 var(--space-xl);
+  width: 100%;
+}
+
+.bioInput {
+  width: 100%;
+  padding: var(--space-md);
+  border: 1px solid var(--light-gray);
+  border-radius: var(--radius-md);
+  font-family: var(--font-main);
+  resize: vertical;
+  min-height: 100px;
+}
+
+.bioInput.error {
+  border-color: var(--error);
+}
+
+.bioMeta {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--space-xs);
+}
+
+.characterCounter {
+  font-size: 0.8rem;
+  color: var(--text-light);
+}
+
+.bioError {
+  color: var(--error);
+  font-size: 0.8rem;
+  text-align: right;
+}
+
 .floatingWallet {
   position: absolute;
   top: var(--space-md);

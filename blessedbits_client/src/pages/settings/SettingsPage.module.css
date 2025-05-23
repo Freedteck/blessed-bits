@@ -89,6 +89,27 @@ textarea.formControl {
   resize: vertical;
 }
 
+.error {
+  border-color: var(--error) !important;
+}
+
+.errorMessage {
+  color: var(--error);
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+}
+
+.bioMeta {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.25rem;
+}
+
+.characterCounter {
+  font-size: 0.8rem;
+  color: var(--text-light);
+}
+
 .avatarUpload {
   display: flex;
   align-items: center;

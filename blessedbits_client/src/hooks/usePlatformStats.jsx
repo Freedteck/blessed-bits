@@ -1,14 +1,18 @@
 import { useSuiClientQuery } from "@mysten/dapp-kit";
 import { useEffect, useState } from "react";
 
-export const usePlatformStats = (platformStateId, userAddress = null) => {
+export const usePlatformStats = (
+  platformStateId,
+  platformConfigId,
+  userAddress = null
+) => {
   const [stats, setStats] = useState(null);
   const [userStaking, setUserStaking] = useState(null);
 
   const {
     data: platformState,
-    refetch,
-    isPending,
+    refetch: refetchState,
+    isPendingPlatformState,
   } = useSuiClientQuery(
     "getObject",
     {
@@ -18,9 +22,31 @@ export const usePlatformStats = (platformStateId, userAddress = null) => {
     { enabled: !!platformStateId }
   );
 
+  const {
+    data: platformConfig,
+    refetch: refetchConfig,
+    isPending: isPendingConfig,
+  } = useSuiClientQuery(
+    "getObject",
+    {
+      id: platformConfigId,
+      options: { showContent: true },
+    },
+    { enabled: !!platformConfigId }
+  );
+  const isPending = isPendingPlatformState || isPendingConfig;
+  const refetch = () => {
+    refetchState();
+    refetchConfig();
+  };
+
   useEffect(() => {
-    if (platformState?.data?.content?.fields) {
+    if (
+      platformState?.data?.content?.fields &&
+      platformConfig?.data?.content?.fields
+    ) {
       const fields = platformState.data.content.fields;
+      const configFields = platformConfig.data.content.fields;
 
       // Platform stats
       setStats({
@@ -29,6 +55,11 @@ export const usePlatformStats = (platformStateId, userAddress = null) => {
         userCount: fields.user_count,
         dailyRewardsPool: fields.daily_rewards_pool,
         totalStaked: fields.total_staked,
+        dailyCashbackAmount: configFields.daily_cashback_amount,
+        minPurchaseAmount: configFields.min_purchase_amount,
+        blessPerSui: configFields.bless_per_sui,
+        dailyRewardsBase: configFields.daily_rewards_base,
+        stakingRewardPercent: configFields.staking_reward_percent,
       });
 
       // User staking info if address provided
@@ -46,7 +77,7 @@ export const usePlatformStats = (platformStateId, userAddress = null) => {
         }
       }
     }
-  }, [platformState, userAddress]);
+  }, [platformState, userAddress, platformConfig]);
 
   return {
     stats,

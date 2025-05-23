@@ -24,12 +24,19 @@ import { formatAddress } from "@mysten/sui/utils";
 import toast from "react-hot-toast";
 
 const SettingsPage = () => {
+  const USERNAME_MIN_LENGTH = 3;
+  const BIO_MIN_LENGTH = 10;
+  const BIO_MAX_LENGTH = 160;
   const [activeTab, setActiveTab] = useState("profile");
   const [displayName, setDisplayName] = useState("JohnDoe");
   const [bio, setBio] = useState("Sharing daily devotionals and prayers");
   const [is2FAEnabled, setIs2FAEnabled] = useState(false);
   const [showAvatarModal, setShowAvatarModal] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState(null);
+  const [errors, setErrors] = useState({
+    username: null,
+    bio: null,
+  });
   const { packageId, platformStateId } = useNetworkVariables(
     "packageId",
     "platformStateId"
@@ -52,7 +59,9 @@ const SettingsPage = () => {
   );
 
   const noChanges =
-    displayName === userProfile?.username && bio === userProfile?.bio;
+    (displayName === userProfile?.username && bio === userProfile?.bio) ||
+    !!errors.username ||
+    !!errors.bio;
 
   useEffect(() => {
     if (userProfile) {
@@ -60,6 +69,24 @@ const SettingsPage = () => {
       setBio(userProfile?.bio);
     }
   }, [userProfile]);
+
+  const validateUsername = (value) => {
+    if (!value) return "Username is required";
+    if (value.length < USERNAME_MIN_LENGTH)
+      return `Must be at least ${USERNAME_MIN_LENGTH} characters`;
+    if (!/^[a-zA-Z0-9_]+$/.test(value))
+      return "Only letters, numbers and underscores allowed";
+    return null;
+  };
+
+  const validateBio = (value) => {
+    if (!value) return "Bio is required";
+    if (value.length < BIO_MIN_LENGTH)
+      return `Must be at least ${BIO_MIN_LENGTH} characters`;
+    if (value.length > BIO_MAX_LENGTH)
+      return `Must be less than ${BIO_MAX_LENGTH} characters`;
+    return null;
+  };
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -77,7 +104,21 @@ const SettingsPage = () => {
   };
 
   const handleSaveChanges = () => {
+    const usernameError = validateUsername(displayName);
+    const bioError = validateBio(bio);
+
+    setErrors({
+      username: usernameError,
+      bio: bioError,
+    });
+
+    if (usernameError || bioError) {
+      toast.error("Please fix the errors before saving");
+      return;
+    }
+
     if (noChanges) return;
+
     updateProfile(displayName, bio, () => {
       refetch();
       setAvatarPreview(null);
@@ -126,19 +167,61 @@ const SettingsPage = () => {
               <label>Display Name</label>
               <input
                 type="text"
-                className={styles.formControl}
+                className={`${styles.formControl} ${
+                  errors.username ? styles.error : ""
+                }`}
                 value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
+                onChange={(e) => {
+                  setDisplayName(e.target.value);
+                  if (errors.username) {
+                    setErrors((prev) => ({
+                      ...prev,
+                      username: validateUsername(e.target.value),
+                    }));
+                  }
+                }}
+                onBlur={() =>
+                  setErrors((prev) => ({
+                    ...prev,
+                    username: validateUsername(displayName),
+                  }))
+                }
               />
+              {errors.username && (
+                <div className={styles.errorMessage}>{errors.username}</div>
+              )}
             </div>
+
             <div className={styles.formGroup}>
               <label>Bio</label>
               <textarea
-                className={styles.formControl}
+                className={`${styles.formControl} ${
+                  errors.bio ? styles.error : ""
+                }`}
                 rows="3"
                 value={bio}
-                onChange={(e) => setBio(e.target.value)}
+                onChange={(e) => {
+                  setBio(e.target.value);
+                  if (errors.bio) {
+                    setErrors((prev) => ({
+                      ...prev,
+                      bio: validateBio(e.target.value),
+                    }));
+                  }
+                }}
+                onBlur={() =>
+                  setErrors((prev) => ({ ...prev, bio: validateBio(bio) }))
+                }
+                maxLength={BIO_MAX_LENGTH}
               />
+              <div className={styles.bioMeta}>
+                <div className={styles.characterCounter}>
+                  {bio.length}/{BIO_MAX_LENGTH}
+                </div>
+                {errors.bio && (
+                  <div className={styles.errorMessage}>{errors.bio}</div>
+                )}
+              </div>
             </div>
             <Button
               variant="primary"

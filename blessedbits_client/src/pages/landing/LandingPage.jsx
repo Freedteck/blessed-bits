@@ -24,11 +24,27 @@ import { useNavigate } from "react-router-dom";
 import AuthModal from "../../components/shared/modal/AuthModal";
 import { useState } from "react";
 import { ConnectButton, useCurrentWallet } from "@mysten/dapp-kit";
+import { useCreators } from "../../hooks/useCreators";
+import { useNetworkVariable } from "../../config/networkConfig";
+import Loading from "../../components/shared/loading/Loading";
+import { useUserData } from "../../hooks/useUserData";
 
 const LandingPage = () => {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const { isConnected } = useCurrentWallet();
+  const platformStateId = useNetworkVariable("platformStateId");
+  const { creators, isPending: creatorsPending } = useCreators(platformStateId);
+
+  const featuredCreators = creators
+    .filter(
+      (creator) => creator.videos_uploaded > 0 && creator.followers.length >= 0
+    )
+    .slice(0, 4);
+  const randomCreator =
+    featuredCreators[Math.floor(Math.random() * featuredCreators.length)];
+  const { videos } = useUserData(platformStateId, randomCreator?.address);
+  const bannerVideo = videos[Math.floor(Math.random() * videos.length)];
 
   const handleClose = () => {
     setIsOpen(false);
@@ -73,37 +89,6 @@ const LandingPage = () => {
       title: "Censorship-Resistant",
       description:
         "No algorithms suppressing spiritual content. The community decides what's valuable.",
-    },
-  ];
-
-  const creators = [
-    {
-      initials: "MG",
-      name: "MindfulGuide",
-      description: "Daily mindfulness tips",
-      followers: "1.2K Followers",
-      earnings: "5.6K $BLESS",
-    },
-    {
-      initials: "FP",
-      name: "FaithPath",
-      description: "Scripture reflections",
-      followers: "890 Followers",
-      earnings: "3.2K $BLESS",
-    },
-    {
-      initials: "SL",
-      name: "SpiritualLife",
-      description: "Meditation guidance",
-      followers: "2.4K Followers",
-      earnings: "8.1K $BLESS",
-    },
-    {
-      initials: "PW",
-      name: "PrayerWarrior",
-      description: "Daily prayer sessions",
-      followers: "1.7K Followers",
-      earnings: "6.3K $BLESS",
     },
   ];
 
@@ -157,18 +142,26 @@ const LandingPage = () => {
         </div>
         <div className={styles.heroPreview}>
           <div className={styles.videoPreview}>
-            <div className={styles.videoThumb}>
-              <FaPlay className={styles.playIcon} />
-            </div>
+            <video
+              className={styles.videoPlayer}
+              autoPlay
+              controls
+              loop
+              muted
+              src={bannerVideo?.video_url}
+              playsInline
+              poster="https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=3000&q=80"
+            ></video>
             <div className={styles.videoInfo}>
-              <div className={styles.creator}>@spiritualguide</div>
+              <div className={styles.creator}>@{randomCreator?.username}</div>
               <div className={styles.title}>Finding peace in chaotic times</div>
               <div className={styles.stats}>
                 <span>
-                  <FaHeart className={styles.statIcon} /> 245
+                  <FaHeart className={styles.statIcon} /> {bannerVideo?.likes}
                 </span>
                 <span>
-                  <FaCoins className={styles.statIcon} /> 56 $BLESS
+                  <FaCoins className={styles.statIcon} />{" "}
+                  {bannerVideo?.total_rewards} $BLESS
                 </span>
               </div>
             </div>
@@ -223,18 +216,21 @@ const LandingPage = () => {
 
       <section className={styles.trendingCreators}>
         <h2>Featured Creators</h2>
-        <div className={styles.creatorsGrid}>
-          {creators.map((creator, index) => (
-            <CreatorCard
-              key={index}
-              initials={creator.initials}
-              name={creator.name}
-              description={creator.description}
-              followers={creator.followers}
-              earnings={creator.earnings}
-            />
-          ))}
-        </div>
+        {creatorsPending ? (
+          <Loading />
+        ) : (
+          <div className={styles.creatorsGrid}>
+            {featuredCreators.map((creator, index) => (
+              <CreatorCard
+                key={index}
+                initials={creator.username.slice(0, 2)}
+                name={creator.username}
+                address={creator.address}
+                followers={creator.followers.length}
+              />
+            ))}
+          </div>
+        )}
       </section>
 
       <footer className={styles.landingFooter}>
