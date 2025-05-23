@@ -65,11 +65,15 @@ const useCreateContent = (
     });
   };
 
-  const refreshDailyPool = async (onSuccess) => {
+  const refreshDailyPool = async (platformConfigId, onSuccess) => {
     const tx = new Transaction();
 
     tx.moveCall({
-      arguments: [tx.object(platformStateId), tx.object("0x6")],
+      arguments: [
+        tx.object(platformStateId),
+        tx.object(platformConfigId),
+        tx.object("0x6"),
+      ],
       target: `${packageId}::blessedbits::refresh_daily_pool`,
     });
 
@@ -343,14 +347,13 @@ const useCreateContent = (
   };
 
   /* ====== TOKEN PURCHASE ====== */
-  const purchaseTokens = async (
-    treasuryCapId,
-    payment,
-    blessAmount,
-    onSuccess
-  ) => {
+  const purchaseTokens = async (treasuryCapId, blessAmount, onSuccess) => {
     const tx = new Transaction();
+    // Calculate required SUI (rounding up)
+    const suiNeeded = Math.ceil(blessAmount / 10000);
 
+    // Split the required SUI from sender's balance
+    const [payment] = tx.splitCoins(tx.gas, [tx.pure.u64(suiNeeded)]);
     tx.moveCall({
       arguments: [
         tx.object(platformStateId),
@@ -417,6 +420,38 @@ const useCreateContent = (
     });
   };
 
+  const updatePlatformConfig = async (
+    configId,
+    dailyCashback,
+    minPurchase,
+    blessPerSui,
+    dailyRewardsBase,
+    stakingRewardPercent,
+    adminCapId,
+    onSuccess
+  ) => {
+    const tx = new Transaction();
+
+    tx.moveCall({
+      arguments: [
+        tx.object(configId),
+        tx.object(adminCapId), // Admin capability
+        tx.pure.u64(dailyCashback),
+        tx.pure.u64(minPurchase),
+        tx.pure.u64(blessPerSui),
+        tx.pure.u64(dailyRewardsBase),
+        tx.pure.u64(stakingRewardPercent),
+      ],
+      target: `${packageId}::blessedbits::update_platform_config`,
+    });
+
+    return executeTransaction(tx, {
+      successMessage: "Platform config updated successfully!",
+      errorMessage: "Error updating config",
+      onSuccess,
+    });
+  };
+
   return {
     uploadVideo,
     deleteVideo,
@@ -435,6 +470,7 @@ const useCreateContent = (
     purchaseTokens,
     distributeStakerRewards,
     checkAchievements,
+    updatePlatformConfig,
   };
 };
 

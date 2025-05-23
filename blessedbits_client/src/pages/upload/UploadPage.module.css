@@ -14,14 +14,28 @@
   font-size: 1.5rem;
 }
 
-.walletBalance {
+.walletBalances {
   display: flex;
   align-items: center;
-  gap: var(--space-sm);
+  gap: var(--space-md);
   font-weight: 500;
 }
 
 .walletBalance svg {
+  color: var(--primary);
+}
+
+.balanceItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  background: var(--light-gray);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+}
+
+.balanceItem svg {
   color: var(--primary);
 }
 

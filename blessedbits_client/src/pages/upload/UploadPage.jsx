@@ -9,7 +9,12 @@ import {
 } from "react-icons/fa";
 import styles from "./UploadPage.module.css";
 import Button from "../../components/shared/button/Button";
-import { useSignAndExecuteTransaction, useSuiClient } from "@mysten/dapp-kit";
+import {
+  useCurrentAccount,
+  useSignAndExecuteTransaction,
+  useSuiClient,
+  useSuiClientQuery,
+} from "@mysten/dapp-kit";
 import {
   useNetworkVariable,
   useNetworkVariables,
@@ -18,6 +23,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { WalletContext } from "../../components/context/walletContext";
 import useCreateContent from "../../hooks/useCreateContent";
 import { uploadFile } from "../../utils/walrusService";
+import { formatSuiBalance } from "../../utils/balance";
 
 // Recommended tags that will be suggested as users type
 const RECOMMENDED_TAGS = [
@@ -64,6 +70,7 @@ const UploadPage = () => {
   const { blessBalance } = useContext(WalletContext);
   const navigate = useNavigate();
 
+  const account = useCurrentAccount();
   const packageId = useNetworkVariable("packageId");
   const { platformStateId, badgeCollectionId } = useNetworkVariables(
     "platformStateId",
@@ -78,6 +85,15 @@ const UploadPage = () => {
     platformStateId,
     suiClient,
     signAndExecute
+  );
+
+  const { data: suiBalance } = useSuiClientQuery(
+    "getBalance",
+    {
+      owner: account?.address || "",
+      coinType: "0x2::sui::SUI",
+    },
+    { enabled: !!account?.address }
   );
 
   const handleFileChange = (e) => {
@@ -181,9 +197,16 @@ const UploadPage = () => {
     <main className={styles.mainContent}>
       <header className={styles.pageHeader}>
         <h2>Upload Short</h2>
-        <div className={styles.walletBalance}>
-          <FaWallet />
-          <span>{blessBalance} $BLESS</span>
+        <div className={styles.walletBalances}>
+          <div className={styles.balanceItem}>
+            <FaWallet />
+            <span>
+              {formatSuiBalance(Number(suiBalance?.totalBalance || 0))}
+            </span>
+          </div>
+          <div className={styles.balanceItem}>
+            <span>{blessBalance} $BLESS</span>
+          </div>
         </div>
       </header>
 

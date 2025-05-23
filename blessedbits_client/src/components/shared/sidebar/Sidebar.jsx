@@ -3,25 +3,57 @@ import {
   FaCompass,
   FaPlusCircle,
   FaCoins,
-  FaTrophy,
   FaUser,
   FaCog,
   FaPrayingHands,
+  FaUserShield, // Admin icon
 } from "react-icons/fa";
 import styles from "./Sidebar.module.css";
 import { NavLink } from "react-router-dom";
-import { ConnectButton } from "@mysten/dapp-kit";
+import {
+  ConnectButton,
+  useCurrentAccount,
+  useSuiClientQuery,
+} from "@mysten/dapp-kit";
+import { useNetworkVariables } from "../../../config/networkConfig";
 
 const Sidebar = () => {
+  const account = useCurrentAccount();
+  const { adminCapId } = useNetworkVariables("adminCapId");
+
+  const { data } = useSuiClientQuery(
+    "getObject",
+    {
+      id: adminCapId,
+      options: {
+        showOwner: true,
+      },
+    },
+    {
+      enabled: !!account?.address && !!adminCapId,
+    }
+  );
+
+  const isAdmin = data?.data?.owner?.AddressOwner === account?.address;
+
   const navLinks = [
     { icon: <FaHome />, label: "Home", path: "/app", key: "home", end: true },
     { icon: <FaCompass />, label: "Explore", path: "explore", key: "explore" },
     { icon: <FaPlusCircle />, label: "Upload", path: "upload", key: "upload" },
     { icon: <FaCoins />, label: "Rewards", path: "rewards", key: "rewards" },
-    // { icon: <FaTrophy />, label: "Badges", path: "badges", key: "badges" },
     { icon: <FaUser />, label: "Profile", path: "profile", key: "profile" },
     { icon: <FaCog />, label: "Settings", path: "settings", key: "settings" },
-  ];
+    ...(isAdmin
+      ? [
+          {
+            icon: <FaUserShield />, // Using shield icon for admin
+            label: "Admin",
+            path: "admin",
+            key: "admin",
+          },
+        ]
+      : []),
+  ].filter(Boolean);
 
   return (
     <aside className={styles.sidebar}>
@@ -49,13 +81,6 @@ const Sidebar = () => {
       </nav>
 
       <div className={styles.navFooter}>
-        {/* <div className={styles.userProfile}>
-          <div className={styles.userAvatar}>JD</div>
-          <div>
-            <div className={styles.username}>JohnDoe</div>
-            <div className={styles.walletAddress}>0x1a2...3b4c</div>
-          </div>
-        </div> */}
         <ConnectButton />
       </div>
     </aside>

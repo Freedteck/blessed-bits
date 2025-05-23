@@ -1,5 +1,11 @@
 import { useEffect, useState } from "react";
-import { FaGift, FaLock, FaLockOpen, FaWallet } from "react-icons/fa";
+import {
+  FaGift,
+  FaLock,
+  FaLockOpen,
+  FaShoppingCart,
+  FaWallet,
+} from "react-icons/fa";
 import styles from "./RewardsPage.module.css";
 import Transactions from "../../components/rewards/transactions/Transactions";
 import StakeModal from "../../components/rewards/stake-modal/StakeModal";
@@ -14,9 +20,12 @@ import { useWeeklyEarnings } from "../../hooks/useWeeklyEarnings";
 import { useUserTransactions } from "../../hooks/useUserTransactions";
 import useCreateContent from "../../hooks/useCreateContent";
 import { useUserData } from "../../hooks/useUserData";
+import BuyModal from "../../components/rewards/buy-modal/BuyModal";
+import { Link } from "react-router-dom";
 
 const RewardsPage = () => {
   const [showStakeModal, setShowStakeModal] = useState(false);
+  const [showBuyModal, setShowBuyModal] = useState(false);
   const [action, setAction] = useState("stake");
   const account = useCurrentAccount();
   const [lastCashbackClaim, setLastCashbackClaim] = useState(0);
@@ -31,12 +40,8 @@ const RewardsPage = () => {
   const suiClient = useSuiClient();
   const { mutate: signAndExecute } = useSignAndExecuteTransaction();
 
-  const { stakeTokens, unstakeTokens, claimDailyCashback } = useCreateContent(
-    packageId,
-    platformStateId,
-    suiClient,
-    signAndExecute
-  );
+  const { stakeTokens, unstakeTokens, claimDailyCashback, purchaseTokens } =
+    useCreateContent(packageId, platformStateId, suiClient, signAndExecute);
 
   const {
     isPending,
@@ -63,6 +68,10 @@ const RewardsPage = () => {
     setShowStakeModal(true);
   };
 
+  const handleBuyAction = () => {
+    setShowBuyModal(true);
+  };
+
   const handleStakeSubmit = (amount) => {
     if (action === "stake") {
       stakeTokens(amount, () => {
@@ -77,6 +86,15 @@ const RewardsPage = () => {
         refetchTxn();
       });
     }
+  };
+
+  const handleBuySubmit = (amount) => {
+    purchaseTokens(treasuryCapId, amount, () => {
+      setShowBuyModal(false);
+      refetch();
+      refetchTxn();
+      refetchUserData();
+    });
   };
 
   const formatTimeUntilNextClaim = (timeLeft) => {
@@ -162,6 +180,12 @@ const RewardsPage = () => {
             onClick={() => handleStakeAction("unstake")}
           >
             <FaLockOpen /> Unstake
+          </button>
+          <button
+            className={styles.buyButton}
+            onClick={() => handleBuyAction()}
+          >
+            <FaShoppingCart /> Buy
           </button>
         </div>
       </header>
@@ -284,7 +308,12 @@ const RewardsPage = () => {
 
       {/* Recent Transactions */}
       <div className={styles.card}>
-        <h3>Recent Transactions</h3>
+        <div className={styles.transactionsHeader}>
+          <h3>Recent Transactions</h3>
+          <Link to="/app/transactions" className={styles.viewAllLink}>
+            View All
+          </Link>
+        </div>
         {transactionsLoading ? (
           <div>Loading transactions...</div>
         ) : (
@@ -299,6 +328,15 @@ const RewardsPage = () => {
           balance={action === "stake" ? walletBless : stakedBless}
           onClose={() => setShowStakeModal(false)}
           onSubmit={handleStakeSubmit}
+        />
+      )}
+
+      {/* Buy Modal */}
+      {showBuyModal && (
+        <BuyModal
+          balance={walletBless}
+          onClose={() => setShowBuyModal(false)}
+          onSubmit={handleBuySubmit}
         />
       )}
     </main>

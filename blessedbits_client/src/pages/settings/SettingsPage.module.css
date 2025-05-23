@@ -43,6 +43,7 @@
 
 .tabContent {
   margin-bottom: var(--space-xl);
+  max-width: 100%;
 }
 
 .card {
@@ -147,6 +148,12 @@ textarea.formControl {
   gap: var(--space-sm);
   font-family: var(--font-mono);
   font-size: 0.875rem;
+  color: var(--primary);
+  cursor: pointer;
+}
+
+.walletAddress:hover {
+  text-decoration: underline;
 }
 
 .hint {

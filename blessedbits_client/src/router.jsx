@@ -10,6 +10,8 @@ import SettingsPage from "./pages/settings/SettingsPage";
 import ExplorePage from "./pages/explore/ExplorePage";
 import OnboardingPage from "./pages/onboarding/OnboardingPage";
 import ProtectedRoutes from "./components/ProtectedRoute";
+import AdminPage from "./pages/admin/AdminPage";
+import TransactionsPage from "./pages/transactions/TransactionsPage";
 
 export const router = createBrowserRouter([
   {
@@ -44,13 +46,17 @@ export const router = createBrowserRouter([
             Component: RewardsPage,
           },
           {
+            path: "transactions",
+            Component: TransactionsPage,
+          },
+          {
             path: "profile",
             Component: ProfilePage,
           },
-          // {
-          //   path: "badges",
-          //   Component: BadgesPage,
-          // },
+          {
+            path: "admin",
+            Component: AdminPage,
+          },
           {
             path: "settings",
             Component: SettingsPage,

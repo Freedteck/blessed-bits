@@ -8,6 +8,7 @@ import { useContext } from "react";
 import styles from "./ProtectedRoute.module.css";
 import Button from "./shared/button/Button";
 import { WalletContext } from "./context/walletContext";
+import Loading from "./shared/loading/Loading";
 
 const ProtectedRoutes = () => {
   const account = useCurrentAccount();
@@ -20,12 +21,13 @@ const ProtectedRoutes = () => {
   if (isConnecting && !account) {
     return (
       <div className={styles.container}>
-        <div className={styles.card}>
+        {/* <div className={styles.card}>
           <h1 className={styles.title}>Connecting...</h1>
           <p className={styles.message}>
             Please wait while we connect to your wallet.
           </p>
-        </div>
+        </div> */}
+        <Loading />
       </div>
     );
   }

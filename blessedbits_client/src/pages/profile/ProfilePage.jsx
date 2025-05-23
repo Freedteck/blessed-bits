@@ -1,5 +1,12 @@
 import { useEffect, useState } from "react";
-import { FaShareAlt, FaEdit, FaSave, FaCheckCircle } from "react-icons/fa";
+import {
+  FaShareAlt,
+  FaEdit,
+  FaSave,
+  FaCheckCircle,
+  FaWallet,
+  FaCopy,
+} from "react-icons/fa";
 import styles from "./ProfilePage.module.css";
 import VideoCard from "../../components/shared/video-card/VideoCard";
 import { useUserData } from "../../hooks/useUserData";
@@ -8,6 +15,7 @@ import {
   useCurrentAccount,
   useSignAndExecuteTransaction,
   useSuiClient,
+  useSuiClientQuery,
 } from "@mysten/dapp-kit";
 import { useUserBlessBalance } from "../../hooks/useUserBlessBalance";
 import Loading from "../../components/shared/loading/Loading";
@@ -15,6 +23,9 @@ import { formatCoin } from "../../utils/formatCoin";
 import useCreateContent from "../../hooks/useCreateContent";
 import { useBadgeData } from "../../hooks/useBadgeData";
 import BadgeCard from "../../components/badges/badge-card/BadgeCard";
+import toast from "react-hot-toast";
+import { formatAddress } from "@mysten/sui/utils";
+import { formatSuiBalance } from "../../utils/balance";
 
 const ProfilePage = () => {
   const [isEditing, setIsEditing] = useState(false);
@@ -34,6 +45,15 @@ const ProfilePage = () => {
   const { userProfile, videos, followers, refetch, isPending } = useUserData(
     platformStateId,
     account?.address
+  );
+
+  const { data: suiBalance } = useSuiClientQuery(
+    "getBalance",
+    {
+      owner: account?.address || "",
+      coinType: "0x2::sui::SUI",
+    },
+    { enabled: !!account?.address }
   );
 
   const { updateBio } = useCreateContent(
@@ -69,6 +89,12 @@ const ProfilePage = () => {
     }
   };
 
+  const copyAddress = () => {
+    if (!account?.address) return;
+    navigator.clipboard.writeText(account.address);
+    toast.success("Address copied to clipboard!");
+  };
+
   const bannerImage =
     "https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&h=200&q=80";
 
@@ -85,6 +111,15 @@ const ProfilePage = () => {
               alt="Banner"
               className={styles.bannerImage}
             />
+            <div className={styles.floatingWallet}>
+              <div className={styles.walletChip} onClick={copyAddress}>
+                <FaWallet className={styles.walletIcon} />
+                <span>{formatAddress(account?.address)}</span>
+                <div className={styles.balanceBadge}>
+                  {formatSuiBalance(suiBalance?.totalBalance)}
+                </div>
+              </div>
+            </div>
             <div className={styles.profileOverlay}>
               <div className={styles.profileAvatar}>
                 {userProfile?.username.slice(0, 2).toUpperCase()}

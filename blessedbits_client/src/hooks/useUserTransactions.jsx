@@ -77,6 +77,16 @@ export const useUserTransactions = (userAddress) => {
           date: date.toLocaleDateString(),
           timestamp: date.getTime(),
         };
+      } else if (event.type.includes("TokensPurchased")) {
+        return {
+          id: event.id.txDigest,
+          type: "earn",
+          icon: <FaCoins />,
+          title: "Tokens Purchased",
+          amount: eventData.bless_amount,
+          date: date.toLocaleDateString(),
+          timestamp: date.getTime(),
+        };
       } else if (event.type.includes("VoteCast") && eventData.is_like) {
         return {
           id: event.id.txDigest,

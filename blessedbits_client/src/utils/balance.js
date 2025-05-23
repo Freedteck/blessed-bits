@@ -13,3 +13,11 @@ export const getBlessBalance = async (suiClient, userAddress, packageId) => {
 
   return total;
 };
+
+export const formatSuiBalance = (mistBalance) => {
+  const balance = Number(mistBalance || 0) / 1_000_000_000;
+  return balance.toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }) + ' SUI';
+};

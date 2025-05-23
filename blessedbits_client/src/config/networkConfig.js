@@ -5,16 +5,22 @@ import {
   DEVNET_PACKAGE_ID,
   DEVNET_PLATFORM_STATE_ID,
   DEVNET_TREASURY_CAP_ID,
+  DEVNET_ADMIN_CAP_ID,
+  DEVNET_PLATFORM_CONFIG_ID,
   MAINNET_BADGE_COLLECTION_ID,
   MAINNET_COIN_METADATA_ID,
   MAINNET_PACKAGE_ID,
   MAINNET_PLATFORM_STATE_ID,
   MAINNET_TREASURY_CAP_ID,
+  MAINNET_ADMIN_CAP_ID,
+  MAINNET_PLATFORM_CONFIG_ID,
   TESTNET_BADGE_COLLECTION_ID,
   TESTNET_COIN_METADATA_ID,
   TESTNET_PACKAGE_ID,
   TESTNET_PLATFORM_STATE_ID,
   TESTNET_TREASURY_CAP_ID,
+  TESTNET_ADMIN_CAP_ID,
+  TESTNET_PLATFORM_CONFIG_ID,
 } from "./constants.js";
 import { createNetworkConfig } from "@mysten/dapp-kit";
 
@@ -28,6 +34,8 @@ const { networkConfig, useNetworkVariable, useNetworkVariables } =
         platformStateId: DEVNET_PLATFORM_STATE_ID,
         treasuryCapId: DEVNET_TREASURY_CAP_ID,
         coinMetadataId: DEVNET_COIN_METADATA_ID,
+        adminCapId: DEVNET_ADMIN_CAP_ID,
+        platformConfigId: DEVNET_PLATFORM_CONFIG_ID,
       },
     },
     testnet: {
@@ -38,6 +46,8 @@ const { networkConfig, useNetworkVariable, useNetworkVariables } =
         platformStateId: TESTNET_PLATFORM_STATE_ID,
         treasuryCapId: TESTNET_TREASURY_CAP_ID,
         coinMetadataId: TESTNET_COIN_METADATA_ID,
+        adminCapId: TESTNET_ADMIN_CAP_ID,
+        platformConfigId: TESTNET_PLATFORM_CONFIG_ID,
       },
     },
     mainnet: {
@@ -48,6 +58,8 @@ const { networkConfig, useNetworkVariable, useNetworkVariables } =
         platformStateId: MAINNET_PLATFORM_STATE_ID,
         treasuryCapId: MAINNET_TREASURY_CAP_ID,
         coinMetadataId: MAINNET_COIN_METADATA_ID,
+        adminCapId: MAINNET_ADMIN_CAP_ID,
+        platformConfigId: MAINNET_PLATFORM_CONFIG_ID,
       },
     },
   });

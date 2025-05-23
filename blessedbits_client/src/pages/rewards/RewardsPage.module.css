@@ -16,7 +16,8 @@
 }
 
 .stakeButton,
-.unstakeButton {
+.unstakeButton,
+.buyButton {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -44,6 +45,14 @@
 
 .unstakeButton:hover {
   background-color: #e66d2a;
+}
+
+.buyButton {
+  background-color: var(--accent);
+  color: var(--dark);
+}
+.buyButton:hover {
+  background-color: #f0c14b;
 }
 
 /* Beautiful Balance Card */
@@ -111,8 +120,15 @@
   margin-bottom: 1.5rem;
 }
 
-.card h3 {
+.transactionsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 1rem;
+  gap: var(--space-sm);
+}
+
+.card h3 {
   font-size: 1.25rem;
   color: var(--text);
 }

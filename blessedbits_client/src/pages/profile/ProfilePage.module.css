@@ -116,6 +116,39 @@
   resize: vertical;
   min-height: 100px;
 }
+.floatingWallet {
+  position: absolute;
+  top: var(--space-md);
+  right: var(--space-md);
+  z-index: 2;
+}
+
+.walletChip {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(4px);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.walletChip:hover {
+  background: white;
+  box-shadow: var(--shadow-md);
+}
+
+.balanceBadge {
+  background: var(--primary-light);
+  color: var(--primary);
+  padding: 2px var(--space-xs);
+  border-radius: var(--radius-pill);
+  font-size: 0.8rem;
+  font-weight: 500;
+}
 
 .profileStats {
   display: flex;

@@ -15,10 +15,13 @@ import { useUserData } from "../../hooks/useUserData";
 import { useNetworkVariables } from "../../config/networkConfig";
 import {
   useCurrentAccount,
+  useDisconnectWallet,
   useSignAndExecuteTransaction,
   useSuiClient,
 } from "@mysten/dapp-kit";
 import useCreateContent from "../../hooks/useCreateContent";
+import { formatAddress } from "@mysten/sui/utils";
+import toast from "react-hot-toast";
 
 const SettingsPage = () => {
   const [activeTab, setActiveTab] = useState("profile");
@@ -32,6 +35,7 @@ const SettingsPage = () => {
     "platformStateId"
   );
   const account = useCurrentAccount();
+  const { mutate: disconnect } = useDisconnectWallet();
 
   const { userProfile, isPending, refetch } = useUserData(
     platformStateId,
@@ -78,6 +82,11 @@ const SettingsPage = () => {
       refetch();
       setAvatarPreview(null);
     });
+  };
+
+  const copyAddress = () => {
+    navigator.clipboard.writeText(account?.address || "");
+    toast.success("Address copied to clipboard");
   };
 
   const tabs = [
@@ -180,13 +189,19 @@ const SettingsPage = () => {
           <div className={styles.card}>
             <h3>Wallet Connection</h3>
             <div className={styles.walletInfo}>
-              <div className={styles.walletAddress}>
+              <div
+                className={styles.walletAddress}
+                onClick={copyAddress}
+                title="Click to copy"
+              >
                 <FaWallet />
-                <span>0x1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p7q8r9s0t</span>
+                <span>{formatAddress(account?.address)}</span>
               </div>
-              <Button variant="outline">Disconnect</Button>
+              <Button variant="outline" onClick={disconnect}>
+                Disconnect
+              </Button>
             </div>
-            <p className={styles.hint}>Connected via zkLogin (Sui Wallet)</p>
+            <p className={styles.hint}>Connected via zkLogin</p>
           </div>
 
           <div className={styles.card}>
